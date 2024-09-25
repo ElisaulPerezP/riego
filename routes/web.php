@@ -2,7 +2,11 @@
 
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
-
+use App\Http\Controllers\ReporteController;
+use App\Http\Controllers\ProgramaRiegoController;
+use App\Http\Controllers\CosechaController;
+use App\Http\Controllers\AspercionController;
+use App\Http\Controllers\TratamientoController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -27,5 +31,20 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
+
+// Rutas para Reporte
+Route::resource('reporte', ReporteController::class);
+
+// Rutas para Programa de Riego
+Route::resource('programa-riego', ProgramaRiegoController::class);
+
+// Rutas para Reportar Cosecha
+Route::resource('cosecha', CosechaController::class);
+
+// Rutas para Reportar Aspercion
+Route::resource('aspercion', AspercionController::class);
+
+// Rutas para Reportar Tratamiento
+Route::resource('tratamiento', TratamientoController::class);
 
 require __DIR__.'/auth.php';
