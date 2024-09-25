@@ -50,4 +50,10 @@ class Cosecha extends Model
     {
         return $this->belongsTo(User::class, 'user_id');
     }
+
+    public function qr()
+    {
+        return $this->hasOne(Qr::class);
+    }
+
 }
