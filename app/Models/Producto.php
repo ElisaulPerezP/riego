@@ -66,4 +66,10 @@ class Producto extends Model
     {
         return $this->belongsToMany(Reporte::class, 'producto_reporte');
     }
+
+    public function stock()
+    {
+        return $this->hasOne(Stock::class);
+    }
+
 }

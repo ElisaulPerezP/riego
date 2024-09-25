@@ -23,12 +23,12 @@
                 </div>
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                        {{ __('Reportar cosecha') }}
+                        {{ __('Cosecha') }}
                     </x-nav-link>
                 </div>
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                        {{ __('Reportar aspercion') }}
+                    <x-nav-link :href="route('aspercion.index')" :active="request()->routeIs('aspercion.index')">
+                        {{ __('Aspercion') }}
                     </x-nav-link>
                 </div>
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
@@ -36,7 +36,11 @@
                         {{ __('Reportar tratamiento') }}
                     </x-nav-link>
                 </div>
-
+                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                    <x-nav-link :href="route('stocks.index')" :active="request()->routeIs('stocks.index')">
+                        {{ __('Stocks') }}
+                    </x-nav-link>
+                </div>
 
             </div>
 
