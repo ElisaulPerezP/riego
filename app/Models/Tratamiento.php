@@ -30,7 +30,7 @@ class Tratamiento extends Model
      */
     public function productos()
     {
-        return $this->belongsToMany(Producto::class, 'producto_tratamiento');
+        return $this->belongsToMany(Producto::class, 'tratamiento_producto');
     }
 
     /**

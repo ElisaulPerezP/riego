@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('tratamientos', function (Blueprint $table) {
             $table->id();
             $table->string('agronomo'); 
-            $table->integer('cantidad'); 
+            $table->decimal('cantidad', 8, 2); 
             $table->string('frecuencia');
             $table->text('diagnostico'); 
             $table->text('notas')->nullable(); 
