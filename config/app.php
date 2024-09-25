@@ -168,6 +168,7 @@ return [
         // App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
+        SimpleSoftwareIO\QrCode\QrCodeServiceProvider::class,
     ])->toArray(),
 
     /*
@@ -182,7 +183,20 @@ return [
     */
 
     'aliases' => Facade::defaultAliases()->merge([
-        // 'Example' => App\Facades\Example::class,
+        'QrCode' => SimpleSoftwareIO\QrCode\Facades\QrCode::class,
     ])->toArray(),
+
+    /*
+    |--------------------------------------------------------------------------
+    | nourse url
+    |--------------------------------------------------------------------------
+    |
+    | esta es una url a la que se van a vincular los codigos QR que se generaran
+    | el seguimiento de los productos. 
+    |
+    */
+    
+    'nurse_url' => env('NURSE_URL', 'https://arandanosdemipueblo.online'),
+
 
 ];

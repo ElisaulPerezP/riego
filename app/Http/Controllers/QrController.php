@@ -6,6 +6,8 @@ use App\Models\Qr;
 use Illuminate\Http\Request;
 use App\Models\Cosecha;
 use Illuminate\Support\Str;
+use App\Http\Actions\QRCodeGenerator;
+
 
 class QrController extends Controller
 {
@@ -47,35 +49,84 @@ class QrController extends Controller
     /**
      * Store a newly created resource in storage.
      */
+
+    
     public function store(Request $request)
     {
         // Validar que el `cosecha_id` sea válido
         $request->validate([
-            'cosecha_id' => 'required|integer|exists:cosechas,id', // Asegurarse de que exista la cosecha
+            'cosecha_id' => 'required|integer|exists:cosechas,id',
         ]);
     
         // Obtener la cosecha correspondiente
         $cosecha = Cosecha::findOrFail($request->input('cosecha_id'));
     
-        // Generar los UUIDs para cada tipo de cajas en función de las cantidades en la cosecha
-        $uuid125 = $this->generateUuids($cosecha->cajas125);
-        $uuid250 = $this->generateUuids($cosecha->cajas250);
-        $uuid500 = $this->generateUuids($cosecha->cajas500);
+        // Generar los UUIDs para cada tipo de cajas
+        $uuid125List = $this->generateUuidArray($cosecha->cajas125);
+        $uuid250List = $this->generateUuidArray($cosecha->cajas250);
+        $uuid500List = $this->generateUuidArray($cosecha->cajas500);
+    
+        // Instanciar el generador de QR
+        $qrGenerator = new QRCodeGenerator();
+    
+        // URL base para los QR
+        $baseUrl = 'https://arandanosdemipueblo.online';
+    
+        // Generar las imágenes de QR para cada tipo de caja
+        try {
+            $qr125Path = null;
+            if (count($uuid125List) > 0) {
+                $qr125FileName = 'qr125_' . time() . '.jpg';
+                $qr125Path = $qrGenerator->generarImagenQR($uuid125List, $baseUrl, $qr125FileName);
+            }
+    
+            $qr250Path = null;
+            if (count($uuid250List) > 0) {
+                $qr250FileName = 'qr250_' . time() . '.jpg';
+                $qr250Path = $qrGenerator->generarImagenQR($uuid250List, $baseUrl, $qr250FileName);
+            }
+    
+            $qr500Path = null;
+            if (count($uuid500List) > 0) {
+                $qr500FileName = 'qr500_' . time() . '.jpg';
+                $qr500Path = $qrGenerator->generarImagenQR($uuid500List, $baseUrl, $qr500FileName);
+            }
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Error al generar las imágenes QR: ' . $e->getMessage());
+        }
     
         // Crear el nuevo QR asociado a la cosecha
         $qr = Qr::create([
             'cosecha_id' => $cosecha->id,
-            'qr125' => null,
-            'qr250' => null,
-            'qr500' => null,
-            'uuid125' => $uuid125,
-            'uuid250' => $uuid250,
-            'uuid500' => $uuid500,
+            'qr125' => $qr125Path,
+            'qr250' => $qr250Path,
+            'qr500' => $qr500Path,
+            'uuid125' => implode(',', $uuid125List),
+            'uuid250' => implode(',', $uuid250List),
+            'uuid500' => implode(',', $uuid500List),
         ]);
     
         // Redirigir al detalle del QR creado
         return redirect()->route('qrs.show', ['qr' => $qr->id])->with('success', 'QR creado exitosamente');
     }
+    
+    /**
+     * Genera un array de UUIDs truncados a 8 caracteres.
+     *
+     * @param int $quantity
+     * @return array
+     */
+    private function generateUuidArray($quantity)
+    {
+        $uuids = [];
+    
+        for ($i = 0; $i < $quantity; $i++) {
+            $uuids[] = substr((string) Str::uuid(), 0, 8);
+        }
+    
+        return $uuids;
+    }
+    
     
     /**
      * Generar una cadena de UUIDs separados por comas.
@@ -87,9 +138,10 @@ class QrController extends Controller
     {
         $uuids = [];
     
-        // Generar tantos UUIDs como indique la cantidad (cajas125, cajas250, cajas500)
+        // Generar tantos UUIDs como indique la cantidad
         for ($i = 0; $i < $quantity; $i++) {
-            $uuids[] = Str::uuid();
+            // Generar un UUID y tomar los primeros 8 caracteres
+            $uuids[] = substr(Str::uuid()->toString(), 0, 8);
         }
     
         // Unir los UUIDs en una cadena separada por comas

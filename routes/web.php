@@ -10,6 +10,8 @@ use App\Http\Controllers\TratamientoController;
 use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\StockController;
 use App\Http\Controllers\QrController;
+use App\Http\Actions\QRCodeGenerator;
+use Illuminate\Support\Facades\File;
 
 /*
 |--------------------------------------------------------------------------
@@ -63,6 +65,35 @@ Route::get('qrs/{qr}', [QrController::class, 'show'])->name('qrs.show');
 
 
 Route::resource('qrs', QrController::class);
+
+Route::get('/generate-qr', function () {
+    // Obtener la URL desde el request
+    $url = "https://arandanosdemipueblo.online/a79a6d73-5d23-4d53-93b5-631e55dec808";
+    
+    // Verificar si se proporcionó la URL
+    if (!$url) {
+        return response()->json(['error' => 'No se proporcionó una URL'], 400);
+    }
+    
+    // Generar el nombre y la ruta de salida del archivo QR
+    $nombreArchivo = 'codigo_qr_' . time() . '.jpg';
+    $rutaSalida = public_path('qrcodes/' . $nombreArchivo);
+
+    // Crear la carpeta si no existe
+    if (!File::exists(public_path('qrcodes'))) {
+        File::makeDirectory(public_path('qrcodes'), 0755, true);
+    }
+
+    // Crear una instancia de QRCodeGenerator y generar el QR
+    $qrGenerator = new QRCodeGenerator();
+    $qrGenerator->generar($url, $rutaSalida);
+
+    // Devolver la imagen generada
+    return response()->download($rutaSalida, $nombreArchivo, [
+        'Content-Type' => 'image/jpeg'
+    ]);
+});
+
 
 });
 

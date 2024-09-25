@@ -15,15 +15,40 @@
                     <p><strong>{{ __('Cosecha ID:') }}</strong> {{ $qr->cosecha_id }}</p>
 
                     <!-- Códigos QR -->
-                    <p><strong>{{ __('QR 125:') }}</strong> {{ $qr->qr125 }}</p>
-                    <p><strong>{{ __('QR 250:') }}</strong> {{ $qr->qr250 }}</p>
-                    <p><strong>{{ __('QR 500:') }}</strong> {{ $qr->qr500 }}</p>
+                    <h4 class="text-md font-semibold mt-4">{{ __('Descarga de Imágenes QR:') }}</h4>
+                    
+                    @if($qr->qr125)
+                        <p>
+                            <strong>{{ __('QR 125g:') }}</strong>
+                            <a href="{{ config('app.nurse_url') }}/{{ $qr->qr125 }}" download>
+                                {{ __('Descargar QR 125g') }}
+                            </a>
+                        </p>
+                    @endif
+
+                    @if($qr->qr250)
+                        <p>
+                            <strong>{{ __('QR 250g:') }}</strong>
+                            <a href="{{ config('app.nurse_url') }}/{{ $qr->qr250 }}" download>
+                                {{ __('Descargar QR 250g') }}
+                            </a>
+                        </p>
+                    @endif
+
+                    @if($qr->qr500)
+                        <p>
+                            <strong>{{ __('QR 500g:') }}</strong>
+                            <a href="{{ config('app.nurse_url') }}/{{ $qr->qr500 }}" download>
+                                {{ __('Descargar QR 500g') }}
+                            </a>
+                        </p>
+                    @endif
 
                     <!-- UUIDs Asociados -->
                     <h4 class="text-md font-semibold mt-4">{{ __('UUIDs Asociados:') }}</h4>
-                    <p><strong>{{ __('UUID 125:') }}</strong> {{ json_encode($qr->uuid125) }}</p>
-                    <p><strong>{{ __('UUID 250:') }}</strong> {{ json_encode($qr->uuid250) }}</p>
-                    <p><strong>{{ __('UUID 500:') }}</strong> {{ json_encode($qr->uuid500) }}</p>
+                    <p><strong>{{ __('UUID 125g:') }}</strong> {{ $qr->uuid125 }}</p>
+                    <p><strong>{{ __('UUID 250g:') }}</strong> {{ $qr->uuid250 }}</p>
+                    <p><strong>{{ __('UUID 500g:') }}</strong> {{ $qr->uuid500 }}</p>
 
                     <!-- Botón Volver al listado -->
                     <x-primary-button class="mt-4">
