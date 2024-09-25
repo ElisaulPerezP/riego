@@ -20,8 +20,10 @@ class Cosecha extends Model
         'fecha',
         'cantidad',
         'porcentaje',
-        'empaquetado',
-        'user_id',  // Añadido para relacionar con el usuario responsable
+        'cajas125',  // Nuevo campo para cajas de 125
+        'cajas250',  // Nuevo campo para cajas de 250
+        'cajas500',  // Nuevo campo para cajas de 500
+        'user_id',   // Añadido para relacionar con el usuario responsable
     ];
 
     /**

@@ -14,15 +14,18 @@ return new class extends Migration
         Schema::create('cosechas', function (Blueprint $table) {
             $table->id();
             $table->date('fecha');
-            $table->integer('cantidad');
+            $table->decimal('cantidad', 5, 2);
             $table->decimal('porcentaje', 5, 2);
-            $table->boolean('empaquetado');
-        
+
+            // Los nuevos campos para empaquetado
+            $table->integer('cajas125')->default(0);  // Cantidad de cajas de 125
+            $table->integer('cajas250')->default(0);  // Cantidad de cajas de 250
+            $table->integer('cajas500')->default(0);  // Cantidad de cajas de 500
+
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
         
             $table->timestamps();
         });
-        
     }
 
     /**
