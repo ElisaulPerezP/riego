@@ -9,6 +9,7 @@ use App\Http\Controllers\AspercionController;
 use App\Http\Controllers\TratamientoController;
 use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\StockController;
+use App\Http\Controllers\QrController;
 
 /*
 |--------------------------------------------------------------------------
@@ -51,6 +52,17 @@ Route::resource('tratamiento', TratamientoController::class);
 Route::resource('productos', ProductoController::class);
 
 Route::resource('stocks', StockController::class);
+
+Route::get('/qrs', [QrController::class, 'index'])->name('qrs.index');
+
+// routes/web.php
+
+Route::get('qrs/create', [QrController::class, 'create'])->name('qrs.create');
+Route::post('qrs', [QrController::class, 'store'])->name('qrs.store');
+Route::get('qrs/{qr}', [QrController::class, 'show'])->name('qrs.show');
+
+
+Route::resource('qrs', QrController::class);
 
 });
 

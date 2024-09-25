@@ -14,7 +14,9 @@ class CosechaController extends Controller
      */
     public function index()
     {
-        $cosechas = Cosecha::with('productos', 'user')->get();
+        // Eager loading de la relación 'qr'
+        $cosechas = Cosecha::with('qr')->get();
+    
         return view('cosechas.index', compact('cosechas'));
     }
 

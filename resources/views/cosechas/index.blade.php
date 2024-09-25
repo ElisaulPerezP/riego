@@ -51,6 +51,18 @@
                                             <a href="{{ route('cosecha.edit', $cosecha) }}" class="text-white">{{ __('Editar') }}</a>
                                         </x-primary-button>
 
+                                        @if ($cosecha->qr)
+                                            <!-- Si existe un QR asociado, mostrar botón "Ver Códigos" -->
+                                            <x-secondary-button class="mr-2">
+                                                <a href="{{ route('qrs.show', $cosecha->qr->id) }}" class="text-black">{{ __('Ver Códigos') }}</a>
+                                            </x-secondary-button>
+                                        @else
+                                            <!-- Si no existe un QR asociado, mostrar botón "Generar QR" -->
+                                            <x-primary-button class="mr-2">
+                                                <a href="{{ route('qrs.create', ['cosecha_id' => $cosecha->id]) }}" class="text-white">{{ __('Generar QR') }}</a>
+                                            </x-primary-button>
+                                        @endif
+
                                         <form action="{{ route('cosecha.destroy', $cosecha) }}" method="POST" class="inline-block">
                                             @csrf
                                             @method('DELETE')
