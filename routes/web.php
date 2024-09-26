@@ -10,8 +10,7 @@ use App\Http\Controllers\TratamientoController;
 use App\Http\Controllers\ProductoController;
 use App\Http\Controllers\StockController;
 use App\Http\Controllers\QrController;
-use App\Http\Actions\QRCodeGenerator;
-use Illuminate\Support\Facades\File;
+use \App\Http\Controllers\Web\ReporteRiegoController;
 
 
 /*
@@ -69,6 +68,14 @@ Route::resource('qrs', QrController::class);
 
 Route::post('set/current-program', [ProgramaRiegoController::class, 'setCurrent'])->name('set.current-program');
 
+
+Route::get('reportes', [ReporteRiegoController::class, 'index'])->name('reportes.index'); // Mostrar la lista de reportes
+Route::get('reportes/create', [ReporteRiegoController::class, 'create'])->name('reportes.create'); // Mostrar el formulario para crear un nuevo reporte
+Route::post('reportes', [ReporteRiegoController::class, 'store'])->name('reportes.store'); // Guardar un nuevo reporte
+Route::get('reportes/{reporteRiego}', [ReporteRiegoController::class, 'show'])->name('reportes.show'); // Mostrar un reporte específico
+Route::get('reportes/{reporteRiego}/edit', [ReporteRiegoController::class, 'edit'])->name('reportes.edit'); // Mostrar el formulario para editar un reporte
+Route::put('reportes/{reporteRiego}', [ReporteRiegoController::class, 'update'])->name('reportes.update'); // Actualizar un reporte específico
+Route::delete('reportes/{reporteRiego}', [ReporteRiegoController::class, 'destroy'])->name('reportes.destroy'); // Eliminar un reporte específico
 });
 
 require __DIR__.'/auth.php';
