@@ -6,8 +6,8 @@
     </x-slot>
 
     <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+        <div class="max-w-full mx-auto sm:px-6 lg:px-8">
+            <div class="bg-white overflow-auto shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
 
                     <!-- Botón para crear nuevo programa -->
@@ -17,10 +17,16 @@
                         </a>
                     </x-primary-button>
 
-                    <!-- Mensaje de éxito -->
+                    <!-- Mensajes de éxito o error -->
                     @if (session('success'))
                         <div class="bg-green-500 text-white p-4 rounded mb-4">
                             {{ session('success') }}
+                        </div>
+                    @endif
+
+                    @if (session('error'))
+                        <div class="bg-red-500 text-white p-4 rounded mb-4">
+                            {{ session('error') }}
                         </div>
                     @endif
 
@@ -83,7 +89,17 @@
                         <tbody>
                             @foreach ($programas as $programa)
                                 <tr>
-                                    <td class="px-2 py-2 border">{{ $programa->id }}</td>
+                                    <td class="px-2 py-2 border">
+                                        <!-- Formulario para seleccionar el programa actual -->
+                                        <form action="{{ route('set.current-program') }}" method="POST">
+                                            @csrf
+                                            <!-- Checkbox exclusivo -->
+                                            <input type="radio" name="programa_riego_id" value="{{ $programa->id }}"
+                                                @if(isset($programaActual) && $programaActual->programa_riego_id == $programa->id) checked @endif
+                                                onchange="this.form.submit();">
+                                            {{ $programa->id }}
+                                        </form>
+                                    </td>
                                     @for ($i = 1; $i <= 14; $i++)
                                         <td class="px-2 py-2 border">
                                             <div class="bar-container">
@@ -102,6 +118,7 @@
                                             <a href="{{ route('programa-riego.edit', $programa) }}" class="text-white">{{ __('Editar') }}</a>
                                         </x-primary-button>
 
+                                        <!-- Formulario de eliminación -->
                                         <form action="{{ route('programa-riego.destroy', $programa) }}" method="POST" class="inline-block">
                                             @csrf
                                             @method('DELETE')
@@ -114,6 +131,7 @@
                             @endforeach
                         </tbody>
                     </table>
+                    <!-- Fin de la tabla -->
 
                 </div>
             </div>

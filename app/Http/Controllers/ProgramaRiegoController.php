@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\ProgramaRiego;
 use Illuminate\Http\Request;
+use App\Models\ProgramaActual;
 
 class ProgramaRiegoController extends Controller
 {
@@ -13,7 +14,9 @@ class ProgramaRiegoController extends Controller
     public function index()
     {
         $programas = ProgramaRiego::all();
-        return view('programas.index', compact('programas'));
+        $programaActual = ProgramaActual::first(); // Obtenemos el programa actual (si existe)
+    
+        return view('programas.index', compact('programas', 'programaActual'));
     }
 
     /**
@@ -29,19 +32,6 @@ class ProgramaRiegoController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'veces_por_dia' => 'required|integer',
-            // Validaciones para los campos de volumen
-            'volumen1' => 'required|integer',
-            'volumen2' => 'required|integer',
-            // ...
-            'volumen14' => 'required|integer',
-            // Validaciones para los campos de fertilizantes
-            'fertilizante1_1' => 'required|integer',
-            'fertilizante1_2' => 'required|integer',
-            // ...
-            'fertilizante2_14' => 'required|integer',
-        ]);
 
         ProgramaRiego::create($request->all());
 
@@ -69,20 +59,6 @@ class ProgramaRiegoController extends Controller
      */
     public function update(Request $request, ProgramaRiego $programa_riego)
     {
-        $request->validate([
-            'veces_por_dia' => 'required|integer',
-            // Validaciones para los campos de volumen
-            'volumen1' => 'required|integer',
-            'volumen2' => 'required|integer',
-            // ...
-            'volumen14' => 'required|integer',
-            // Validaciones para los campos de fertilizantes
-            'fertilizante1_1' => 'required|integer',
-            'fertilizante1_2' => 'required|integer',
-            // ...
-            'fertilizante2_14' => 'required|integer',
-        ]);
-
         $programa_riego->update($request->all());
 
         return redirect()->route('programa-riego.index')->with('success', 'Programa de riego actualizado con éxito.');
@@ -96,5 +72,25 @@ class ProgramaRiegoController extends Controller
         $programa_riego->delete();
 
         return redirect()->route('programa-riego.index')->with('success', 'Programa de riego eliminado con éxito.');
+    }
+
+    public function setCurrent(Request $request)
+    {
+        $programaRiegoId = $request->input('programa_riego_id');
+
+        // Validamos que el programa de riego existe
+        $exists = ProgramaRiego::where('id', $programaRiegoId)->exists();
+
+        if ($exists) {
+            // Actualizamos o creamos el registro en programa_actual
+            ProgramaActual::updateOrCreate(
+                ['id' => 1], // Asumimos que siempre es el registro con ID 1
+                ['programa_riego_id' => $programaRiegoId]
+            );
+
+            return redirect()->route('programa-riego.index')->with('success', 'Programa de Riego actualizado correctamente.');
+        } else {
+            return redirect()->route('programa-riego.index')->with('error', 'El Programa de Riego seleccionado no existe.');
+        }
     }
 }
