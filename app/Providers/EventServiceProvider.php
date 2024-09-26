@@ -6,6 +6,8 @@ use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Event;
+use \App\Events\ApiTrafficLogged;
+use \App\Listeners\HandleApiTrafficLogged;
 
 class EventServiceProvider extends ServiceProvider
 {
@@ -18,6 +20,9 @@ class EventServiceProvider extends ServiceProvider
         Registered::class => [
             SendEmailVerificationNotification::class,
         ],
+        ApiTrafficLogged::class => [
+            HandleApiTrafficLogged::class,
+        ],
     ];
 
     /**
@@ -25,7 +30,7 @@ class EventServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        parent::boot();
     }
 
     /**
