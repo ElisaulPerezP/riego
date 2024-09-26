@@ -71,8 +71,4 @@ Route::post('set/current-program', [ProgramaRiegoController::class, 'setCurrent'
 
 });
 
-//Route::post('programa-riego/set_current', [ProgramaRiegoController::class, 'setCurrent'])->name('programa-riego.set_current');
-//Route::post('programa-riego/set_current', function(){dd("si llega");})->name('programa-riego.set_current');
-
-
 require __DIR__.'/auth.php';
