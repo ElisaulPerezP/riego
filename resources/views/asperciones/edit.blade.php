@@ -49,16 +49,27 @@
                             </select>
                         </div>
 
-                        <div class="mb-3">
-                            <label for="productos" class="form-label">Productos</label>
-                            <select class="form-control" id="productos" name="productos[]" multiple required>
-                                @foreach ($productos as $producto)
-                                    <option value="{{ $producto->id }}" {{ in_array($producto->id, $aspercion->productos->pluck('id')->toArray()) ? 'selected' : '' }}>
-                                        {{ $producto->nombre }}
-                                    </option>
-                                @endforeach
-                            </select>
+                        <!-- Productos y Cantidades -->
+                        <div id="productos-container" class="mt-4">
+                            <x-input-label :value="__('Productos y Cantidades')" />
+                            @foreach($aspercion->productos as $index => $producto)
+                                <div class="producto-item mt-2">
+                                    <select name="productos[]" class="block mt-1 w-full" required>
+                                        @foreach($productos as $prod)
+                                            <option value="{{ $prod->id }}" {{ $prod->id == $producto->id ? 'selected' : '' }}>
+                                                {{ $prod->nombre }} (Stock: {{ $prod->cantidad }})
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    <x-text-input class="block mt-1 w-full" type="number" name="cantidades[]" min="1" value="{{ $producto->pivot->cantidad_de_producto }}" required />
+                                </div>
+                            @endforeach
                         </div>
+
+                        <!-- Botón para agregar más productos -->
+                        <button type="button" id="agregar-producto" class="mt-2 bg-blue-500 text-white px-4 py-2 rounded">Agregar Producto</button>
+
+
 
                         <button type="submit" class="btn btn-primary">Actualizar</button>
                     </form>
@@ -77,3 +88,21 @@
         </div>
     </div>
 </x-app-layout>
+<script>
+    // JavaScript para agregar más campos de producto y cantidad
+    document.getElementById('agregar-producto').addEventListener('click', function() {
+        const container = document.getElementById('productos-container');
+        const newItem = document.createElement('div');
+        newItem.classList.add('producto-item', 'mt-2');
+        newItem.innerHTML = `
+            <select name="productos[]" class="block mt-1 w-full" required>
+                <option value="">{{ __('Selecciona un producto') }}</option>
+                @foreach($productos as $producto)
+                    <option value="{{ $producto->id }}">{{ $producto->nombre }} (Stock: {{ $producto->cantidad }})</option>
+                @endforeach
+            </select>
+            <x-text-input class="block mt-1 w-full" type="number" name="cantidades[]" min="1" placeholder="Cantidad utilizada" required />
+        `;
+        container.appendChild(newItem);
+    });
+</script>

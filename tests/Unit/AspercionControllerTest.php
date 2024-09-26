@@ -61,6 +61,7 @@ public function it_stores_a_new_aspercion_successfully()
     $user = User::factory()->create();
     $productos = Producto::factory()->count(2)->create();
     $this->actingAs($user);
+
     $data = [
         'fecha' => now()->toDateString(),
         'hora' => now()->format('H:i'),
@@ -68,6 +69,7 @@ public function it_stores_a_new_aspercion_successfully()
         'tipo_aspercion' => 'Tipo A',
         'responsable' => 'Juan Pérez',
         'user_id' => $user->id,
+        'cantidad_de_producto' => 50, // Nueva entrada
         'productos' => $productos->pluck('id')->toArray(),
     ];
 
@@ -79,12 +81,15 @@ public function it_stores_a_new_aspercion_successfully()
     $this->assertDatabaseHas('asperciones', [
         'volumen' => 100.5,
         'responsable' => 'Juan Pérez',
+        'cantidad_de_producto' => 50, // Verificar que se guardó correctamente
     ]);
 
     $aspercion = Aspercion::first();
     $this->assertEquals($user->id, $aspercion->user_id);
     $this->assertCount(2, $aspercion->productos);
 }
+
+/** @test */
 /** @test */
 public function it_fails_to_store_aspercion_due_to_validation_errors()
 {
@@ -96,10 +101,12 @@ public function it_fails_to_store_aspercion_due_to_validation_errors()
         // 'tipo_aspercion' is missing
         'responsable' => '', // Required field
         'user_id' => 9999, // Non-existent user
+        'cantidad_de_producto' => 'invalid', // Should be integer
         'productos' => 'not_an_array', // Should be an array
     ];
     $user = User::factory()->create();
     $this->actingAs($user);
+
     // Act: Make a POST request to store the aspercion
     $response = $this->from(route('aspercion.create'))->post(route('aspercion.store'), $data);
 
@@ -112,10 +119,12 @@ public function it_fails_to_store_aspercion_due_to_validation_errors()
         'tipo_aspercion',
         'responsable',
         'user_id',
+        'cantidad_de_producto',
         'productos',
     ]);
     $this->assertDatabaseCount('asperciones', 0);
 }
+
 /** @test */
 public function it_displays_an_existing_aspercion()
 {
@@ -172,6 +181,7 @@ public function it_returns_404_when_editing_non_existent_aspercion()
     $response->assertStatus(404);
 }
 /** @test */
+/** @test */
 public function it_updates_an_existing_aspercion_successfully()
 {
     // Arrange: Create an aspercion, user, and products
@@ -179,6 +189,7 @@ public function it_updates_an_existing_aspercion_successfully()
     $aspercion = Aspercion::factory()->create();
     $productos = Producto::factory()->count(2)->create();
     $this->actingAs($user);
+
     $updateData = [
         'fecha' => now()->addDay()->toDateString(),
         'hora' => '10:30',
@@ -186,6 +197,7 @@ public function it_updates_an_existing_aspercion_successfully()
         'tipo_aspercion' => 'Tipo B',
         'responsable' => 'María López',
         'user_id' => $user->id,
+        'cantidad_de_producto' => 75, // Nueva entrada
         'productos' => $productos->pluck('id')->toArray(),
     ];
 
@@ -198,12 +210,14 @@ public function it_updates_an_existing_aspercion_successfully()
         'id' => $aspercion->id,
         'volumen' => 200,
         'responsable' => 'María López',
+        'cantidad_de_producto' => 75, // Verificar que se actualizó correctamente
     ]);
 
     $aspercion->refresh();
     $this->assertEquals($user->id, $aspercion->user_id);
     $this->assertCount(2, $aspercion->productos);
 }
+
 /** @test */
 public function it_fails_to_update_aspercion_due_to_validation_errors()
 {

@@ -17,11 +17,23 @@
                     <p><strong>Usuario Responsable:</strong> {{ $aspercion->user->name ?? 'N/A' }}</p>
 
                     <h3>Productos Utilizados:</h3>
-                    <ul>
-                        @foreach ($aspercion->productos as $producto)
-                            <li>{{ $producto->nombre }}</li>
-                        @endforeach
-                    </ul>
+                    <table class="min-w-full bg-white">
+                        <thead>
+                            <tr>
+                                <th class="px-6 py-3 text-left">Producto</th>
+                                <th class="px-6 py-3 text-left">Cantidad Utilizada</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($aspercion->productos as $producto)
+                                <tr>
+                                    <td class="px-6 py-4">{{ $producto->nombre }}</td>
+                                    <td class="px-6 py-4">{{ $producto->pivot->cantidad_de_producto }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+
 
                     <a href="{{ route('aspercion.index') }}" class="btn btn-secondary">Volver</a>
                 </div>

@@ -33,6 +33,7 @@
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fecha</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Hora</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Volumen</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Cantidad de producto</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tipo de Asperción</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Responsable</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Usuario Responsable</th>
@@ -45,6 +46,7 @@
                                         <td class="px-6 py-4 whitespace-nowrap">{{ $aspercion->fecha }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap">{{ $aspercion->hora }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap">{{ $aspercion->volumen }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">{{ $aspercion->cantidad_de_producto }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap">{{ $aspercion->tipo_aspercion }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap">{{ $aspercion->responsable }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap">{{ $aspercion->user->name ?? 'N/A' }}</td>

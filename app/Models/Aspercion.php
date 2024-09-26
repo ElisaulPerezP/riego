@@ -23,7 +23,7 @@ class Aspercion extends Model
         'tipo_aspercion',
         'responsable',
         'anotaciones',
-        'user_id',  // El usuario responsable de la asperción
+        'user_id',  
     ];
 
     /**
@@ -31,9 +31,10 @@ class Aspercion extends Model
      */
     public function productos()
     {
-        return $this->belongsToMany(Producto::class, 'aspercion_producto');
+        return $this->belongsToMany(Producto::class, 'aspercion_producto')
+                    ->withPivot('cantidad_de_producto')
+                    ->withTimestamps();
     }
-
     /**
      * Relación uno a muchos (inversa) con User.
      * Un usuario (responsable) puede estar relacionado con muchas asperciones.

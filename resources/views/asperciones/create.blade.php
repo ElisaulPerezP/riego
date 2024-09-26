@@ -60,16 +60,28 @@
                             <x-input-error :messages="$errors->get('user_id')" class="mt-2" />
                         </div>
 
-                        <!-- Productos -->
-                        <div class="mt-4">
-                            <x-input-label for="productos" :value="__('Productos')" />
-                            <select id="productos" name="productos[]" class="block mt-1 w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" multiple required>
-                                @foreach($productos as $producto)
-                                    <option value="{{ $producto->id }}">{{ $producto->nombre }}</option>
-                                @endforeach
-                            </select>
-                            <x-input-error :messages="$errors->get('productos')" class="mt-2" />
+                        <!-- Productos y Cantidades -->
+                        <div id="productos-container" class="mt-4">
+                            <x-input-label :value="__('Productos y Cantidades')" />
+                            <div class="producto-item mt-2">
+                                <select name="productos[]" class="block mt-1 w-full" required>
+                                    <option value="">{{ __('Selecciona un producto') }}</option>
+                                    @foreach($productos as $producto)
+                                        <option value="{{ $producto->id }}">
+                                            {{ $producto->nombre }} (Presentación: {{ $producto->cantidad }}, Stock: {{ $producto->stock->cantidad_en_stock ?? 'N/A' }})
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <x-input-error :messages="$errors->get('productos.*')" class="mt-2" />
+
+                                <x-input-label :value="__('Cantidad a usar')" class="mt-2" />
+                                <x-text-input class="block mt-1 w-full" type="number" name="cantidades[]" min="1" placeholder="Cantidad utilizada" required />
+                                <x-input-error :messages="$errors->get('cantidades.*')" class="mt-2" />
+                            </div>
                         </div>
+
+                        <!-- Botón para agregar más productos -->
+                        <button type="button" id="agregar-producto" class="mt-2 bg-blue-500 text-white px-4 py-2 rounded">Agregar Producto</button>
 
                         <!-- Botón de Enviar -->
                         <div class="flex items-center justify-end mt-4">
@@ -83,3 +95,25 @@
         </div>
     </div>
 </x-app-layout>
+
+<script>
+    // JavaScript para agregar más campos de producto y cantidad
+    document.getElementById('agregar-producto').addEventListener('click', function() {
+        const container = document.getElementById('productos-container');
+        const newItem = document.createElement('div');
+        newItem.classList.add('producto-item', 'mt-2');
+        newItem.innerHTML = `
+            <select name="productos[]" class="block mt-1 w-full" required>
+                <option value="">{{ __('Selecciona un producto') }}</option>
+                @foreach($productos as $producto)
+                    <option value="{{ $producto->id }}">
+                        {{ $producto->nombre }} (Presentación: {{ $producto->cantidad }}, Stock: {{ $producto->stock->cantidad_en_stock ?? 'N/A' }})
+                    </option>
+                @endforeach
+            </select>
+            <x-input-label :value="__('Cantidad a usar')" class="mt-2" />
+            <input class="block mt-1 w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" type="number" name="cantidades[]" min="1" placeholder="Cantidad utilizada" required />
+        `;
+        container.appendChild(newItem);
+    });
+</script>

@@ -40,8 +40,11 @@ class Producto extends Model
      */
     public function asperciones()
     {
-        return $this->belongsToMany(Aspercion::class, 'aspercion_producto');
+        return $this->belongsToMany(Aspercion::class, 'aspercion_producto')
+                    ->withPivot('cantidad_de_producto')
+                    ->withTimestamps();
     }
+    
 
     /**
      * Relación muchos a muchos con Cosecha.

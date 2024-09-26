@@ -15,6 +15,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('aspercion_id')->constrained('asperciones')->onDelete('cascade');
             $table->foreignId('producto_id')->constrained('productos')->onDelete('cascade');
+            $table->integer('cantidad_de_producto'); // Agregar este campo
+            $table->timestamps(); // Opcional, pero recomendado para seguimiento
         });
     }
 
