@@ -29,11 +29,10 @@ class AspercionFactory extends Factory
             'volumen' => $this->faker->randomFloat(2, 10, 500), // Entre 10 y 500 litros
             'tipo_aspercion' => $this->faker->word(),
             'responsable' => $this->faker->name(),
-            'user_id' => User::factory(),
-            'cantidad_de_producto' => $this->faker->numberBetween(1, 100), // Nuevo campo
+            'user_id' => User::factory(), // Relación con un usuario generado por el factory
+            'anotaciones' => $this->faker->sentence(),
         ];
     }
-
 
     /**
      * Estado personalizado para asociar productos.
@@ -45,7 +44,13 @@ class AspercionFactory extends Factory
     {
         return $this->afterCreating(function (Aspercion $aspercion) use ($cantidadProductos) {
             $productos = Producto::factory()->count($cantidadProductos)->create();
-            $aspercion->productos()->attach($productos->pluck('id'));
+
+            // Asociar productos con cantidades aleatorias a la asperción
+            $syncData = [];
+            foreach ($productos as $producto) {
+                $syncData[$producto->id] = ['cantidad_de_producto' => $this->faker->numberBetween(1, 100)];
+            }
+            $aspercion->productos()->attach($syncData);
         });
     }
 }

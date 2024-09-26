@@ -9,12 +9,18 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 
+use App\Http\Actions\RestarProductoAStock;
+use App\Http\Actions\AjustarStockProducto;
+use App\Models\Stock;
+
+
 class AspercionControllerTest extends TestCase
 {
     use RefreshDatabase, WithFaker;
 
     
     /** @test */
+/** @test */
 public function it_displays_a_list_of_asperciones()
 {
     // Arrange: Create some asperciones with related products and users
@@ -26,7 +32,7 @@ public function it_displays_a_list_of_asperciones()
         ->for($user)
         ->create();
 
-    $aspercion->productos()->attach($productos->pluck('id'));
+    $aspercion->productos()->attach($productos->pluck('id'), ['cantidad_de_producto' => 10]);
 
     // Act: Make a GET request to the index route
     $response = $this->get(route('aspercion.index'));
@@ -38,6 +44,7 @@ public function it_displays_a_list_of_asperciones()
         return $asperciones->contains($aspercion);
     });
 }
+
 /** @test */
 public function it_displays_the_create_form()
 {
@@ -60,6 +67,16 @@ public function it_stores_a_new_aspercion_successfully()
     // Arrange: Create a user and products
     $user = User::factory()->create();
     $productos = Producto::factory()->count(2)->create();
+
+    // Crear stock para cada producto
+    foreach ($productos as $producto) {
+        Stock::create([
+            'producto_id' => $producto->id,
+            'dias_para_vencimiento' => 1,
+            'cantidad_en_stock' => 100,
+        ]);
+    }
+
     $this->actingAs($user);
 
     $data = [
@@ -69,8 +86,8 @@ public function it_stores_a_new_aspercion_successfully()
         'tipo_aspercion' => 'Tipo A',
         'responsable' => 'Juan Pérez',
         'user_id' => $user->id,
-        'cantidad_de_producto' => 50, // Nueva entrada
         'productos' => $productos->pluck('id')->toArray(),
+        'cantidades' => [30, 20], // Cantidades usadas
     ];
 
     // Act: Make a POST request to store the aspercion
@@ -81,14 +98,30 @@ public function it_stores_a_new_aspercion_successfully()
     $this->assertDatabaseHas('asperciones', [
         'volumen' => 100.5,
         'responsable' => 'Juan Pérez',
-        'cantidad_de_producto' => 50, // Verificar que se guardó correctamente
     ]);
 
     $aspercion = Aspercion::first();
     $this->assertEquals($user->id, $aspercion->user_id);
     $this->assertCount(2, $aspercion->productos);
+
+    // Verificar que las cantidades en la tabla pivote son correctas
+    foreach ($productos as $index => $producto) {
+        $this->assertDatabaseHas('aspercion_producto', [
+            'aspercion_id' => $aspercion->id,
+            'producto_id' => $producto->id,
+            'cantidad_de_producto' => $data['cantidades'][$index],
+        ]);
+    }
+
+    // Verificar que el stock se redujo correctamente
+    foreach ($productos as $index => $producto) {
+        $stock = Stock::where('producto_id', $producto->id)->first();
+        $expectedStock = 100 - $data['cantidades'][$index];
+        $this->assertEquals($expectedStock, $stock->cantidad_en_stock);
+    }
 }
 
+/** @test */
 /** @test */
 /** @test */
 public function it_fails_to_store_aspercion_due_to_validation_errors()
@@ -101,8 +134,8 @@ public function it_fails_to_store_aspercion_due_to_validation_errors()
         // 'tipo_aspercion' is missing
         'responsable' => '', // Required field
         'user_id' => 9999, // Non-existent user
-        'cantidad_de_producto' => 'invalid', // Should be integer
         'productos' => 'not_an_array', // Should be an array
+        'cantidades' => 'invalid', // Should be an array
     ];
     $user = User::factory()->create();
     $this->actingAs($user);
@@ -119,11 +152,12 @@ public function it_fails_to_store_aspercion_due_to_validation_errors()
         'tipo_aspercion',
         'responsable',
         'user_id',
-        'cantidad_de_producto',
         'productos',
+        'cantidades',
     ]);
     $this->assertDatabaseCount('asperciones', 0);
 }
+
 
 /** @test */
 public function it_displays_an_existing_aspercion()
@@ -182,12 +216,39 @@ public function it_returns_404_when_editing_non_existent_aspercion()
 }
 /** @test */
 /** @test */
+/** @test */
 public function it_updates_an_existing_aspercion_successfully()
 {
     // Arrange: Create an aspercion, user, and products
     $user = User::factory()->create();
-    $aspercion = Aspercion::factory()->create();
     $productos = Producto::factory()->count(2)->create();
+
+    // Crear stock para cada producto
+    foreach ($productos as $producto) {
+        Stock::create([
+            'producto_id' => $producto->id,
+            'dias_para_vencimiento' => 1,
+            'cantidad_en_stock' => 100,
+        ]);
+    }
+
+    $aspercion = Aspercion::factory()->create([
+        'user_id' => $user->id,
+    ]);
+
+    // Asociar productos con cantidades iniciales
+    $aspercion->productos()->attach([
+        $productos[0]->id => ['cantidad_de_producto' => 30],
+        $productos[1]->id => ['cantidad_de_producto' => 20],
+    ]);
+
+    // Reducir el stock inicial
+    foreach ($productos as $index => $producto) {
+        $stock = Stock::where('producto_id', $producto->id)->first();
+        $stock->cantidad_en_stock -= ($index == 0 ? 30 : 20);
+        $stock->save();
+    }
+
     $this->actingAs($user);
 
     $updateData = [
@@ -197,8 +258,8 @@ public function it_updates_an_existing_aspercion_successfully()
         'tipo_aspercion' => 'Tipo B',
         'responsable' => 'María López',
         'user_id' => $user->id,
-        'cantidad_de_producto' => 75, // Nueva entrada
         'productos' => $productos->pluck('id')->toArray(),
+        'cantidades' => [40, 10], // Nuevas cantidades
     ];
 
     // Act: Make a PUT request to update the aspercion
@@ -210,12 +271,31 @@ public function it_updates_an_existing_aspercion_successfully()
         'id' => $aspercion->id,
         'volumen' => 200,
         'responsable' => 'María López',
-        'cantidad_de_producto' => 75, // Verificar que se actualizó correctamente
     ]);
 
     $aspercion->refresh();
     $this->assertEquals($user->id, $aspercion->user_id);
-    $this->assertCount(2, $aspercion->productos);
+
+    // Verificar que las cantidades en la tabla pivote son correctas
+    foreach ($productos as $index => $producto) {
+        $this->assertDatabaseHas('aspercion_producto', [
+            'aspercion_id' => $aspercion->id,
+            'producto_id' => $producto->id,
+            'cantidad_de_producto' => $updateData['cantidades'][$index],
+        ]);
+    }
+
+    // Verificar que el stock se ajustó correctamente
+    foreach ($productos as $index => $producto) {
+        $stock = Stock::where('producto_id', $producto->id)->first();
+
+        // Calcular el stock esperado
+        $cantidadAnterior = ($index == 0) ? 30 : 20;
+        $cantidadNueva = $updateData['cantidades'][$index];
+        $stockEsperado = 100 - $cantidadNueva;
+
+        $this->assertEquals($stockEsperado, $stock->cantidad_en_stock);
+    }
 }
 
 /** @test */
@@ -253,10 +333,17 @@ public function it_fails_to_update_aspercion_due_to_validation_errors()
 /** @test */
 public function it_deletes_an_existing_aspercion()
 {
-    // Arrange: Create an aspercion with products
     $aspercion = Aspercion::factory()->create();
     $productos = Producto::factory()->count(2)->create();
-    $aspercion->productos()->attach($productos->pluck('id'));
+    
+    // Proporcionar el valor para 'cantidad_de_producto' en la tabla pivote
+    $syncData = [];
+    foreach ($productos as $producto) {
+        $syncData[$producto->id] = ['cantidad_de_producto' => 10]; // Cantidad ficticia para el test
+    }
+    
+    $aspercion->productos()->attach($syncData);
+    
     $user = User::factory()->create();
     $this->actingAs($user);
     // Act: Make a DELETE request to destroy the aspercion
@@ -290,5 +377,53 @@ public function it_denies_access_to_unauthenticated_users()
     // Assert: Should redirect to login
     $response->assertRedirect(route('login'));
 }
+
+/** @test */
+public function it_reduces_stock_correctly_using_restar_producto_a_stock()
+{
+    // Arrange
+    $producto = Producto::factory()->create();
+    Stock::create([
+        'producto_id' => $producto->id,
+        'dias_para_vencimiento' => 1,
+        'cantidad_en_stock' => 100,
+    ]);
+
+    $syncData = [
+        $producto->id => ['cantidad_de_producto' => 30],
+    ];
+
+    // Act
+    $action = new RestarProductoAStock();
+    $action->ejecutar($syncData);
+
+    // Assert
+    $stock = Stock::where('producto_id', $producto->id)->first();
+    $this->assertEquals(70, $stock->cantidad_en_stock);
+}
+
+/** @test */
+public function it_throws_exception_when_not_enough_stock_in_restar_producto_a_stock()
+{
+    // Arrange
+    $producto = Producto::factory()->create();
+    Stock::create([
+        'producto_id' => $producto->id,
+        'dias_para_vencimiento' => 1,
+        'cantidad_en_stock' => 50,
+    ]);
+
+    $syncData = [
+        $producto->id => ['cantidad_de_producto' => 60], // Más de lo disponible
+    ];
+
+    // Act & Assert
+    $this->expectException(\Exception::class);
+    $this->expectExceptionMessage("No hay suficiente stock disponible para el producto: {$producto->nombre}");
+
+    $action = new RestarProductoAStock();
+    $action->ejecutar($syncData);
+}
+
 
 }
