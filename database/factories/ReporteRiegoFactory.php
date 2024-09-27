@@ -15,8 +15,21 @@ class ReporteRiegoFactory extends Factory
 
         for ($i = 1; $i <= 14; $i++) {
             $data["volumen{$i}"] = $this->faker->randomFloat(2, 0, 25);
-            $data["tiempo{$i}"] = $this->faker->time('H:i:s');
-            $data["mensaje{$i}"] = $this->faker->sentence;
+            // Generar tiempo entre 0 y 20 minutos (0 a 1200 segundos)
+            $seconds = $this->faker->numberBetween(0, 1200);
+            $data["tiempo{$i}"] = gmdate('H:i:s', $seconds);
+            $data["mensaje{$i}"] = $this->faker->randomElement([
+                'Riego exitoso',
+                'Necesita revisión',
+                'Volumen adecuado',
+                'Tiempo insuficiente',
+                'Fertilizante aplicado correctamente',
+                'Alerta de sistema',
+                'Sin problemas detectados',
+                'Error en el surco',
+                'Mantenimiento requerido',
+                'Operación normal'
+            ]);
         }
 
         return $data;
