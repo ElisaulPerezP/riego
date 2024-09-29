@@ -25,6 +25,11 @@ use App\Http\Controllers\DashboardController;
 |
 */
 
+
+// Ruta para el dashboard
+Route::get('/graph', [ReporteController::class, 'createGraph'])
+    ->name('graph');
+
 Route::get('/', function () {
     return view('welcome');
 });

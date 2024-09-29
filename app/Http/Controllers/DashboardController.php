@@ -20,7 +20,16 @@ class DashboardController extends Controller
 
         // Obtener el último reporte de riego, asumiendo que existe una columna 'created_at'
         $ultimoReporte = ReporteRiego::latest()->first();
+        // Verificar si la imagen generada existe en el almacenamiento público
+        $image_path = storage_path('app/public/graphs/graficas_reporte_riego.png');
+        $public_image_url = null;
 
-        return view('dashboard', compact('programaActual', 'ultimoReporte'));
+        if (file_exists($image_path)) {
+            // Si la imagen existe, generar la URL pública
+            $public_image_url = asset('storage/graphs/graficas_reporte_riego.png');
+        }
+        // Pasar la URL de la imagen a la vista del dashboard, si existe
+        return view('dashboard', compact('programaActual', 'ultimoReporte', 'public_image_url'));
     }
+
 }

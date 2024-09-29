@@ -203,6 +203,20 @@
                                 </tbody>
                             </table>
                             <!-- Fin de la tabla -->
+
+                            <!-- Botón para regenerar gráficos -->
+                            <div class="mb-8 text-center">
+                                <a href="{{ route('graph') }}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                                    {{ __('Regenerar Gráficos') }}
+                                </a>
+                            </div>
+                             <!-- Mostrar la imagen generada si existe -->
+                             @if (isset($public_image_url))
+                                <div class="mt-8">
+                                    <h3 class="text-lg font-semibold mb-4">{{ __('Gráfica de Riego') }}</h3>
+                                    <img src="{{ $public_image_url }}" alt="Gráfica de Riego" class="mx-auto">
+                                </div>
+                            @endif
                         </div>
                     @else
                         <!-- Opcional: Mensaje si no hay reportes -->

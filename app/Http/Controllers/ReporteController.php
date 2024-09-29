@@ -4,9 +4,43 @@ namespace App\Http\Controllers;
 
 use App\Models\Reporte;
 use Illuminate\Http\Request;
+use App\Models\ReporteRiego;
+
 
 class ReporteController extends Controller
 {
+
+    public function createGraph()
+    {
+        // Obtener los últimos reportes de riego
+        $reportes = ReporteRiego::latest()->take(10)->get()->toJson();
+    
+        // Definir la ruta de salida para las imágenes
+        $output_path = storage_path('app/public/graphs');
+        $image_file = $output_path . '/graficas_reporte_riego.png';
+    
+        // Verificar si la imagen existe y eliminarla si es así
+        if (file_exists($image_file)) {
+            unlink($image_file);
+        }
+        $python_script = base_path('resources/py/graficator.py');
+        // Ejecutar el script de Python, capturando también los errores
+        $command = "python3 {$python_script} '{$reportes}' '{$output_path}' 2>&1";
+        $output = shell_exec($command);
+    
+        // Ver el resultado de la ejecución para depurar si es necesario (descomenta para pruebas)
+        // dd($output);
+    
+        // Verificar si la imagen se generó correctamente
+        if (file_exists($image_file)) {
+            // Si la imagen fue creada correctamente, redirigir al dashboard
+            return redirect()->route('dashboard')->with('success', 'Gráfica generada exitosamente.');
+        } else {
+            // Si hubo algún problema, redirigir con un mensaje de error
+            return redirect()->route('dashboard')->with('error', 'Error al generar la gráfica.');
+        }
+    }
+
     /**
      * Display a listing of the resource.
      */
