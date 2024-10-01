@@ -1,0 +1,6 @@
+pigpio
+pytest
+qrcode
+Pillow
+requests
+coverage
