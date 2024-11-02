@@ -18,17 +18,28 @@ class Scheduler:
         """
         Genera el cronograma de actividades de riego basado en el programa actual.
         """
-        # Paso 1: Calcular las franjas horarias según veces_por_dia
-        self.calculate_time_slots()
+        try:
+            # Paso 1: Calcular las franjas horarias según veces_por_dia
+            self.calculate_time_slots()
 
-        # Paso 2: Calcular los porcentajes de volumen para cada camellón
-        self.calculate_volumes_percentage()
+            # Paso 2: Calcular los porcentajes de volumen para cada camellón
+            self.calculate_volumes_percentage()
 
-        # Paso 3: Asignar actividades a las franjas horarias
-        self.assign_activities_to_slots()
+            # Paso 3: Asignar actividades a las franjas horarias
+            self.assign_activities_to_slots()
 
-        # Paso 4: Guardar el cronograma en un archivo (opcional)
-        self.save_cronograma_actividades()
+            # Paso 4: Guardar el cronograma en un archivo (opcional)
+            self.save_cronograma_actividades()
+
+            # Si todos los pasos se ejecutaron correctamente
+            return True
+
+        except Exception as e:
+            print(f"Error al generar el cronograma de actividades: {e}")
+            return False
+
+
+
 
     def calculate_time_slots(self):
         """
@@ -53,7 +64,7 @@ class Scheduler:
         """
         self.volumen_total = 0
         for i in range(1, 15):  # Camellones 1 a 14
-            volumen = self.programa_actual.get(f'volumen{i}', 0)
+            volumen = (self.programa_actual.get('programa_riego')).get(f'volumen{i}', 0)
             self.volumen_total += volumen
 
         if self.volumen_total == 0:
@@ -62,7 +73,7 @@ class Scheduler:
             return
 
         for i in range(1, 15):
-            volumen = self.programa_actual.get(f'volumen{i}', 0)
+            volumen = (self.programa_actual.get('programa_riego')).get(f'volumen{i}', 0)
             porcentaje = volumen / self.volumen_total
             self.porcentajes.append(porcentaje)
 
@@ -86,15 +97,17 @@ class Scheduler:
                 fin_riego = inicio_riego + timedelta(seconds=duracion_riego)
 
                 # Obtener fertilizantes para el camellón actual
-                fertilizante1 = self.programa_actual.get(f'fertilizante1_{i+1}', 0)
-                fertilizante2 = self.programa_actual.get(f'fertilizante2_{i+1}', 0)
+                
+                fertilizante1 = (self.programa_actual.get('programa_riego')).get(f'fertilizante1_{i+1}', 0)
+                fertilizante2 = (self.programa_actual.get('programa_riego')).get(f'fertilizante2_{i+1}', 0)
 
                 actividad = {
                     'inicio': inicio_riego.strftime('%H:%M'),
                     'fin': fin_riego.strftime('%H:%M'),
                     'accion': {
                         'camellon': i + 1,
-                        'volumen': self.programa_actual.get(f'volumen{i+1}', 0),
+                        
+                        'volumen': (self.programa_actual.get('programa_riego')).get(f'volumen{i+1}', 0),
                         'fertilizante1': fertilizante1,
                         'fertilizante2': fertilizante2
                     }
@@ -107,14 +120,18 @@ class Scheduler:
 
     def save_cronograma_actividades(self):
         """
-        Guarda el cronograma de actividades en un archivo JSON.
+        Guarda el cronograma de actividades en un archivo JSON y muestra su contenido.
         """
         try:
             with open('cronograma_actividades.json', 'w') as f:
                 json.dump(self.cronograma_actividades, f, indent=4)
             print("Cronograma de actividades guardado exitosamente.")
+            print("Contenido guardado en cronograma_actividades.json:")
+            print(json.dumps(self.cronograma_actividades, indent=4))  # Muestra el contenido guardado en formato JSON
+        
         except IOError as e:
             print(f"Error al guardar el cronograma de actividades: {e}")
+
 
     def load_cronograma_actividades(self):
         """

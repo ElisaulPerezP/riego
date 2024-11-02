@@ -14,7 +14,6 @@ class MainController:
         # Inicializar componentes
         self.config_loader = ConfigLoader()
         self.communication_manager = None
-        self.scheduler = None
         self.gpio_manager = None
         self.flags = {
             'flagArchivoProgramaActual': False,
@@ -27,6 +26,7 @@ class MainController:
             'flagProgramaListo': False,
             'flagCronogramaListo': False
         }
+        self.scheduler = Scheduler(self.config_loader.programa_actual)
 
 
     def start(self):
@@ -69,7 +69,6 @@ class MainController:
 
     def initialize_components(self):
         # Intentar cargar los archivos de configuración
-        print("Inicializando componentes...")
         self.flags['flagArchivoProgramaActual'] = self.config_loader.load_programa_actual()
         self.flags['flagArchivoCronogramaActividades'] = self.config_loader.load_cronograma_actividades()
         self.flags['flagArchivoCronogramaComunicaciones'] = self.config_loader.load_cronograma_comunicaciones()
@@ -89,25 +88,30 @@ class MainController:
         else:
             print("Error: No se pudo cargar la configuración de direcciones.")
 
-        # Intentar obtener el programa actual de riego
-        self.attempt_communication()
+        # Determinar algun programa para gestionar el riego, si encuetra un archivo lo usa
+        if self.flags['flagArchivoProgramaActual']:
+            self.programa_actual = self.config_loader.programa_actual
+        else:
+            # Intenta obtener el programa de la aplicacion
+            self.attempt_communication()
 
         # Preparar las banderas según la lógica definida
         self.prepare_flags()
 
-        # Generar el cronograma si es necesario
-        if not self.flags['flagCronogramaListo']:
-            self.generate_cronograma()
-
         # Inicializar el Scheduler
-        self.scheduler = Scheduler(self.config_loader.programa_actual)
+        self.scheduler = Scheduler(self.programa_actual)
+
+        # Generar el cronograma si es necesario
+        if not self.flags['flagCronogramaListo'] and self.flags['flagArchivoProgramaActual']:
+            self.flags['flagCronogramaListo'] = self.scheduler.generate_cronograma()
+
+
 
     def attempt_communication(self):
         # Intentar establecer comunicación para obtener el programa actual
         self.flags['flagProgramaObtenido'] = self.communication_manager.obtain_programa_actual()
-
         if self.flags['flagProgramaObtenido']:
-            self.programa_obtenido = self.communication_manager.programa_obtenido
+            self.programa_actual = self.communication_manager.programa_obtenido
         else:
             print("Error: No se pudo obtener el programa actual de riego.")
 
@@ -129,9 +133,11 @@ class MainController:
                 # Actualizar programa_actual con programa_obtenido
                 self.config_loader.programa_actual = programa_obtenido
                 self.flags['flagProgramaListo'] = True
+
                 self.flags['flagCronogramaListo'] = False       
         elif flagArchivoProgramaActual and not flagProgramaObtenido:
             self.flags['flagProgramaListo'] = True
+
             if self.flags['flagArchivoCronogramaActividades']:
                 self.flags['flagCronogramaListo'] = True
             else:
@@ -143,15 +149,6 @@ class MainController:
             self.flags['flagCronogramaListo'] = False
         else:
             print("Error: No se pudo obtener o cargar el programa actual de riego.")
-
-    def generate_cronograma(self):
-        # Generar el cronograma de actividades
-        self.scheduler = Scheduler(self.config_loader.programa_actual)
-        self.scheduler.generate_cronograma()
-        # Guardar el cronograma en el archivo
-        self.config_loader.save_cronograma_actividades(self.scheduler.cronograma_actividades)
-        # Actualizar la bandera
-        self.flags['flagCronogramaListo'] = True
 
     def communication_loop(self):
         # Bucle para manejar las comunicaciones según el cronograma

@@ -21,6 +21,7 @@ class CommunicationManager:
             response = requests.get(url, headers=headers, timeout=10)
             if response.status_code == 200:
                 self.programa_obtenido = response.json()
+                self.save_programa_actual(self.programa_obtenido )
                 self.flagProgramaObtenido = True
                 return True
             else:

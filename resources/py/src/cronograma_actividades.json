@@ -1,1 +1,142 @@
-[]
+[
+    {
+        "inicio": "00:00",
+        "fin": "00:48",
+        "accion": {
+            "camellon": 1,
+            "volumen": 7.8,
+            "fertilizante1": 6.1,
+            "fertilizante2": 7.7
+        }
+    },
+    {
+        "inicio": "00:48",
+        "fin": "02:09",
+        "accion": {
+            "camellon": 2,
+            "volumen": 13,
+            "fertilizante1": 5.8,
+            "fertilizante2": 4.7
+        }
+    },
+    {
+        "inicio": "02:09",
+        "fin": "03:17",
+        "accion": {
+            "camellon": 3,
+            "volumen": 11.1,
+            "fertilizante1": 3.4,
+            "fertilizante2": 2.8
+        }
+    },
+    {
+        "inicio": "03:17",
+        "fin": "04:13",
+        "accion": {
+            "camellon": 4,
+            "volumen": 8.9,
+            "fertilizante1": 5.7,
+            "fertilizante2": 7
+        }
+    },
+    {
+        "inicio": "04:13",
+        "fin": "06:33",
+        "accion": {
+            "camellon": 5,
+            "volumen": 22.6,
+            "fertilizante1": 9,
+            "fertilizante2": 6.7
+        }
+    },
+    {
+        "inicio": "06:33",
+        "fin": "07:18",
+        "accion": {
+            "camellon": 6,
+            "volumen": 7.2,
+            "fertilizante1": 6.4,
+            "fertilizante2": 8.8
+        }
+    },
+    {
+        "inicio": "07:18",
+        "fin": "09:42",
+        "accion": {
+            "camellon": 7,
+            "volumen": 23.2,
+            "fertilizante1": 5.6,
+            "fertilizante2": 4.2
+        }
+    },
+    {
+        "inicio": "09:42",
+        "fin": "12:06",
+        "accion": {
+            "camellon": 8,
+            "volumen": 23.2,
+            "fertilizante1": 6.9,
+            "fertilizante2": 3.7
+        }
+    },
+    {
+        "inicio": "12:06",
+        "fin": "14:25",
+        "accion": {
+            "camellon": 9,
+            "volumen": 22.5,
+            "fertilizante1": 7.2,
+            "fertilizante2": 6.2
+        }
+    },
+    {
+        "inicio": "14:25",
+        "fin": "16:09",
+        "accion": {
+            "camellon": 10,
+            "volumen": 16.8,
+            "fertilizante1": 6.7,
+            "fertilizante2": 4.4
+        }
+    },
+    {
+        "inicio": "16:09",
+        "fin": "18:40",
+        "accion": {
+            "camellon": 11,
+            "volumen": 24.2,
+            "fertilizante1": 8,
+            "fertilizante2": 8.3
+        }
+    },
+    {
+        "inicio": "18:40",
+        "fin": "20:36",
+        "accion": {
+            "camellon": 12,
+            "volumen": 18.8,
+            "fertilizante1": 4.3,
+            "fertilizante2": 4.4
+        }
+    },
+    {
+        "inicio": "20:36",
+        "fin": "22:30",
+        "accion": {
+            "camellon": 13,
+            "volumen": 18.3,
+            "fertilizante1": 6.3,
+            "fertilizante2": 6.3
+        }
+    },
+    {
+        "inicio": "22:30",
+        "fin": "23:59",
+        "accion": {
+            "camellon": 14,
+            "volumen": 14.3,
+            "fertilizante1": 4.7,
+            "fertilizante2": 4.1
+        }
+    }
+]

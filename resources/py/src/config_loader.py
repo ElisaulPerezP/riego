@@ -2,6 +2,8 @@
 
 import json
 import os
+from datetime import datetime
+
 
 class ConfigLoader:
     def __init__(self):
@@ -63,15 +65,22 @@ class ConfigLoader:
 
     def load_cronograma_actividades(self):
         """
-        Intenta cargar el cronograma de actividades.
+        Intenta cargar y validar el cronograma de actividades.
         """
         filename = 'cronograma_actividades.json'
         if os.path.isfile(filename):
             try:
                 with open(filename, 'r') as f:
-                    self.cronograma_actividades = json.load(f)
-                self.flags['flagArchivoCronogramaActividades'] = True
-                return True
+                    data = json.load(f)
+                # Validar el contenido del cronograma de actividades
+                if self.validate_cronograma_actividades(data):
+                    self.cronograma_actividades = data
+                    self.flags['flagArchivoCronogramaActividades'] = True
+                    return True
+                else:
+                    self.flags['flagArchivoCronogramaActividades'] = False
+                    self.error_messages.append(f"Contenido inválido en {filename}")
+                    return False
             except json.JSONDecodeError as e:
                 self.flags['flagArchivoCronogramaActividades'] = False
                 self.error_messages.append(f"Error al decodificar {filename}: {e}")
@@ -81,21 +90,63 @@ class ConfigLoader:
             self.error_messages.append(f"Archivo inexistente: {filename}")
             return False
 
-    def save_cronograma_actividades(self, cronograma):
+    def validate_cronograma_actividades(self, data):
         """
-        Guarda el cronograma de actividades en un archivo local.
+        Valida que el contenido del cronograma de actividades tenga la estructura y datos correctos.
         """
-        filename = 'cronograma_actividades.json'
-        try:
-            with open(filename, 'w') as f:
-                json.dump(cronograma, f, indent=4)
-            self.cronograma_actividades = cronograma
-            self.flags['flagArchivoCronogramaActividades'] = True
-            print("Cronograma de actividades guardado exitosamente.")
-        except IOError as e:
-            self.flags['flagArchivoCronogramaActividades'] = False
-            self.error_messages.append(f"Error al guardar {filename}: {e}")
+        # Verificar que `data` sea una lista y que no esté vacía
+        if not isinstance(data, list) or not data:
+            print("El cronograma de actividades debe ser una lista no vacía.")
+            return False
 
+        for index, actividad in enumerate(data):
+            # Validar que cada actividad sea un diccionario
+            if not isinstance(actividad, dict):
+                print(f"Actividad en índice {index} no es un diccionario.")
+                return False
+
+            # Verificar que tenga las claves 'inicio', 'fin', 'accion'
+            required_keys = ['inicio', 'fin', 'accion']
+            for key in required_keys:
+                if key not in actividad:
+                    print(f"Falta la clave '{key}' en actividad en índice {index}.")
+                    return False
+
+            # Validar formatos de 'inicio' y 'fin'
+            try:
+                datetime.strptime(actividad['inicio'], '%H:%M')
+                datetime.strptime(actividad['fin'], '%H:%M')
+            except ValueError:
+                print(f"Formato de hora inválido en actividad en índice {index}.")
+                return False
+
+            # Validar que 'accion' es un diccionario con las claves necesarias
+            accion = actividad['accion']
+            if not isinstance(accion, dict):
+                print(f"'accion' en actividad en índice {index} no es un diccionario.")
+                return False
+
+            accion_required_keys = ['camellon', 'volumen', 'fertilizante1', 'fertilizante2']
+            for key in accion_required_keys:
+                if key not in accion:
+                    print(f"Falta la clave '{key}' en 'accion' de actividad en índice {index}.")
+                    return False
+
+                # Validar que los valores sean del tipo correcto
+                if key == 'camellon':
+                    if not isinstance(accion[key], int) or accion[key] <= 0:
+                        print(f"Valor inválido para 'camellon' en actividad en índice {index}.")
+                        return False
+                else:
+                    if not isinstance(accion[key], (int, float)) or accion[key] < 0:
+                        print(f"Valor inválido para '{key}' en actividad en índice {index}.")
+                        return False
+
+        # Si todas las validaciones pasan
+        return True
+
+
+        
     def load_cronograma_comunicaciones(self):
         """
         Intenta cargar el cronograma de comunicaciones.
