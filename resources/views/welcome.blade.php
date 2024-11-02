@@ -51,7 +51,7 @@
         <div class="container">
             <!-- Logo -->
             <div class="logo">
-                <img src="{{ asset('storage/logo.svg') }}" alt="Logo" width="150">
+                @include('components.application-logo')
             </div>
 
             <!-- Buttons for login and register -->
