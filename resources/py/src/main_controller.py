@@ -1,28 +1,18 @@
 # main_controller.py
 
 import threading
-print("threading importado")
 import time
-print("time importado")
 from config_loader import ConfigLoader
-print("ConfigLoader importado")
 from communication_manager import CommunicationManager
-print("CommunicationManager importado")
 from scheduler import Scheduler
-print("Scheduler importado")
 from gpio_manager import GPIOManager
-print("GPIOManager importado")
 from datetime import datetime
-print("datetime importado")
 
 
 class MainController:
     def __init__(self):
-        print("Iniciando MainController...")
         # Inicializar componentes
-        print("Inicializando ConfigLoader...")
         self.config_loader = ConfigLoader()
-        print("ConfigLoader inicializado")
         self.communication_manager = None
         self.scheduler = None
         self.gpio_manager = None
@@ -38,6 +28,44 @@ class MainController:
             'flagCronogramaListo': False
         }
 
+
+    def start(self):
+        # Inicializar los componentes
+        self.initialize_components()
+
+        # Verificar que el programa y el cronograma estén listos
+        if not self.flags['flagProgramaListo']:
+            print("Error: El programa no está listo. No se puede iniciar el controlador.")
+            return
+
+        if not self.flags['flagCronogramaListo']:
+            print("Error: El cronograma no está listo. No se puede iniciar el controlador.")
+            return
+
+        # Iniciar los hilos
+        hilo_gpio = threading.Thread(target=self.gpio_manager.run)
+        hilo_comunicacion = threading.Thread(target=self.communication_loop)
+        hilo_scheduler = threading.Thread(target=self.scheduler.run)
+        hilo_emergency_stop = threading.Thread(target=self.gpio_manager.monitor_emergency_stop)
+
+        # Establecer los hilos como demonios
+        hilo_gpio.daemon = True
+        hilo_comunicacion.daemon = True
+        hilo_scheduler.daemon = True
+        hilo_emergency_stop.daemon = True
+
+        # Iniciar los hilos
+        hilo_gpio.start()
+        hilo_comunicacion.start()
+        hilo_scheduler.start()
+        hilo_emergency_stop.start()
+
+        # Mantener el programa en ejecución
+        try:
+            while True:
+                time.sleep(1)
+        except KeyboardInterrupt:
+            print("Deteniendo el controlador principal.")
 
     def initialize_components(self):
         # Intentar cargar los archivos de configuración
@@ -125,49 +153,11 @@ class MainController:
         # Actualizar la bandera
         self.flags['flagCronogramaListo'] = True
 
-    def start(self):
-        # Inicializar los componentes
-        self.initialize_components()
-
-        # Verificar que el programa y el cronograma estén listos
-        if not self.flags['flagProgramaListo']:
-            print("Error: El programa no está listo. No se puede iniciar el controlador.")
-            return
-
-        if not self.flags['flagCronogramaListo']:
-            print("Error: El cronograma no está listo. No se puede iniciar el controlador.")
-            return
-
-        # Iniciar los hilos
-        hilo_gpio = threading.Thread(target=self.gpio_manager.run)
-        hilo_comunicacion = threading.Thread(target=self.communication_loop)
-        hilo_scheduler = threading.Thread(target=self.scheduler.run)
-        hilo_emergency_stop = threading.Thread(target=self.gpio_manager.monitor_emergency_stop)
-
-        # Establecer los hilos como demonios
-        hilo_gpio.daemon = True
-        hilo_comunicacion.daemon = True
-        hilo_scheduler.daemon = True
-        hilo_emergency_stop.daemon = True
-
-        # Iniciar los hilos
-        hilo_gpio.start()
-        hilo_comunicacion.start()
-        hilo_scheduler.start()
-        hilo_emergency_stop.start()
-
-        # Mantener el programa en ejecución
-        try:
-            while True:
-                time.sleep(1)
-        except KeyboardInterrupt:
-            print("Deteniendo el controlador principal.")
-
     def communication_loop(self):
         # Bucle para manejar las comunicaciones según el cronograma
         while True:
             current_time = datetime.now().strftime("%H:%M")
-            for evento in self.config_loader.load_cronograma_comunicaciones:
+            for evento in self.config_loader.cronograma_comunicaciones:
                 inicio = evento['inicio']
                 finalizacion = evento['finalizacion']
                 accion = evento['accion']
@@ -182,6 +172,5 @@ class MainController:
             time.sleep(60)  # Esperar un minuto antes de volver a comprobar
             
 if __name__ == '__main__':
-    print("Ejecutando main_controller.py directamente")
     controller = MainController()
     controller.start()

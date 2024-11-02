@@ -96,24 +96,26 @@ class ConfigLoader:
             self.flags['flagArchivoCronogramaActividades'] = False
             self.error_messages.append(f"Error al guardar {filename}: {e}")
 
-def load_cronograma_comunicaciones(self):
-    filename = 'cronograma_comunicaciones.json'
-    if os.path.isfile(filename):
-        try:
-            with open(filename, 'r') as f:
-                self.cronograma_comunicaciones = json.load(f)
-            print("Cronograma de comunicaciones cargado:", self.cronograma_comunicaciones)  # Depuración
-            self.flags['flagArchivoCronogramaComunicaciones'] = True
-            return True
-        except json.JSONDecodeError as e:
+    def load_cronograma_comunicaciones(self):
+        """
+        Intenta cargar el cronograma de comunicaciones.
+        """
+        filename = 'cronograma_comunicaciones.json'
+        if os.path.isfile(filename):
+            try:
+                with open(filename, 'r') as f:
+                    self.cronograma_comunicaciones = json.load(f)
+                print("Cronograma de comunicaciones cargado:", self.cronograma_comunicaciones)  # Depuración
+                self.flags['flagArchivoCronogramaComunicaciones'] = True
+                return True
+            except json.JSONDecodeError as e:
+                self.flags['flagArchivoCronogramaComunicaciones'] = False
+                self.error_messages.append(f"Error al decodificar {filename}: {e}")
+                return False
+        else:
             self.flags['flagArchivoCronogramaComunicaciones'] = False
-            self.error_messages.append(f"Error al decodificar {filename}: {e}")
+            self.error_messages.append(f"Archivo inexistente: {filename}")
             return False
-    else:
-        self.flags['flagArchivoCronogramaComunicaciones'] = False
-        self.error_messages.append(f"Archivo inexistente: {filename}")
-        return False
-
 
     def load_gpio_config(self):
         """
