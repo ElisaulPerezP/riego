@@ -2,6 +2,7 @@
 
 from datetime import datetime, timedelta
 import json
+import time
 
 class Scheduler:
     def __init__(self, programa_actual):

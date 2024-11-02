@@ -1,0 +1,11 @@
+{
+    "base_url": "http://127.0.0.1/api",
+    "endpoints": {
+        "reportes_index": "/reportes",
+        "reportes_store": "/reportes",
+        "reportes_show": "/reportes/{reporte}",
+        "reportes_update": "/reportes/{reporte}",
+        "reportes_destroy": "/reportes/{reporte}",
+        "url_obtener_programa": "/programa"
+    }
+}

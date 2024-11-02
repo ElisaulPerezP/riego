@@ -1,17 +1,28 @@
 # main_controller.py
 
 import threading
+print("threading importado")
 import time
+print("time importado")
 from config_loader import ConfigLoader
+print("ConfigLoader importado")
 from communication_manager import CommunicationManager
+print("CommunicationManager importado")
 from scheduler import Scheduler
+print("Scheduler importado")
 from gpio_manager import GPIOManager
+print("GPIOManager importado")
 from datetime import datetime
+print("datetime importado")
+
 
 class MainController:
     def __init__(self):
+        print("Iniciando MainController...")
         # Inicializar componentes
+        print("Inicializando ConfigLoader...")
         self.config_loader = ConfigLoader()
+        print("ConfigLoader inicializado")
         self.communication_manager = None
         self.scheduler = None
         self.gpio_manager = None
@@ -27,8 +38,10 @@ class MainController:
             'flagCronogramaListo': False
         }
 
+
     def initialize_components(self):
         # Intentar cargar los archivos de configuración
+        print("Inicializando componentes...")
         self.flags['flagArchivoProgramaActual'] = self.config_loader.load_programa_actual()
         self.flags['flagArchivoCronogramaActividades'] = self.config_loader.load_cronograma_actividades()
         self.flags['flagArchivoCronogramaComunicaciones'] = self.config_loader.load_cronograma_comunicaciones()
@@ -154,7 +167,7 @@ class MainController:
         # Bucle para manejar las comunicaciones según el cronograma
         while True:
             current_time = datetime.now().strftime("%H:%M")
-            for evento in self.config_loader.cronograma_comunicaciones:
+            for evento in self.config_loader.load_cronograma_comunicaciones:
                 inicio = evento['inicio']
                 finalizacion = evento['finalizacion']
                 accion = evento['accion']
@@ -167,3 +180,8 @@ class MainController:
                         evento_riego = self.scheduler.get_last_event()
                         self.communication_manager.report_event(evento_riego)
             time.sleep(60)  # Esperar un minuto antes de volver a comprobar
+            
+if __name__ == '__main__':
+    print("Ejecutando main_controller.py directamente")
+    controller = MainController()
+    controller.start()

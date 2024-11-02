@@ -15,7 +15,8 @@ class CommunicationManager:
         Intenta obtener el programa actual de riego desde el servidor remoto.
         """
         try:
-            url = self.api_config['url_obtener_programa']
+            # Construir la URL completa para obtener el programa
+            url = f"{self.api_config['base_url']}{self.api_config['endpoints']['url_obtener_programa']}"
             headers = {'Content-Type': 'application/json'}
             response = requests.get(url, headers=headers, timeout=10)
             if response.status_code == 200:
@@ -36,7 +37,8 @@ class CommunicationManager:
         Reporta un evento de riego al servidor remoto.
         """
         try:
-            url = self.api_config['url_reportar_evento']
+            # Construir la URL completa para reportar el evento
+            url = f"{self.api_config['base_url']}{self.api_config['endpoints']['reportes_store']}"
             headers = {'Content-Type': 'application/json'}
             payload = self.construct_event_payload(evento_riego)
             response = requests.post(url, headers=headers, data=json.dumps(payload), timeout=10)
@@ -107,6 +109,7 @@ class CommunicationManager:
             'mensaje14': evento_riego.get('mensaje14', ''),
         }
         return payload
+
 
     def construct_programa_payload(self, programa_data):
         """

@@ -1,0 +1,21 @@
+threading importado
+time importado
+ConfigLoader importado
+CommunicationManager importado
+Scheduler importado
+GPIOManager importado
+datetime importado
+Ejecutando main_controller.py directamente
+Iniciando MainController...
+Inicializando ConfigLoader...
+ConfigLoader inicializado
+Inicializando componentes...
+Traceback (most recent call last):
+  File "/var/www/riego/resources/py/src/main_controller.py", line 187, in <module>
+    controller.start()
+  File "/var/www/riego/resources/py/src/main_controller.py", line 130, in start
+    self.initialize_components()
+  File "/var/www/riego/resources/py/src/main_controller.py", line 47, in initialize_components
+    self.flags['flagArchivoCronogramaComunicaciones'] = self.config_loader.cronograma_comunicaciones()
+                                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: 'NoneType' object is not callable
