@@ -156,7 +156,6 @@ class ConfigLoader:
             try:
                 with open(filename, 'r') as f:
                     self.cronograma_comunicaciones = json.load(f)
-                print("Cronograma de comunicaciones cargado:", self.cronograma_comunicaciones)  # Depuración
                 self.flags['flagArchivoCronogramaComunicaciones'] = True
                 return True
             except json.JSONDecodeError as e:

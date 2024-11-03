@@ -1,5 +1,3 @@
-# scheduler.py
-
 from datetime import datetime, timedelta
 import json
 import time
@@ -7,7 +5,7 @@ import time
 class Scheduler:
     def __init__(self, programa_actual):
         self.programa_actual = programa_actual
-        self.cronograma_actividades = {}
+        self.cronograma_actividades = []
         self.franjas_horarias = {}
         self.porcentajes = []
         self.volumen_total = 0
@@ -38,14 +36,11 @@ class Scheduler:
             print(f"Error al generar el cronograma de actividades: {e}")
             return False
 
-
-
-
     def calculate_time_slots(self):
         """
         Calcula las franjas horarias según 'veces_por_dia'.
         """
-        veces_por_dia = self.programa_actual.get('veces_por_dia', 1)
+        veces_por_dia = self.programa_actual.get('programa_riego', {}).get('veces_por_dia', 1)
         interval_hours = 24 / veces_por_dia
         self.franjas_horarias = {}
 
@@ -64,7 +59,7 @@ class Scheduler:
         """
         self.volumen_total = 0
         for i in range(1, 15):  # Camellones 1 a 14
-            volumen = (self.programa_actual.get('programa_riego')).get(f'volumen{i}', 0)
+            volumen = self.programa_actual.get('programa_riego', {}).get(f'volumen{i}', 0)
             self.volumen_total += volumen
 
         if self.volumen_total == 0:
@@ -73,50 +68,61 @@ class Scheduler:
             return
 
         for i in range(1, 15):
-            volumen = (self.programa_actual.get('programa_riego')).get(f'volumen{i}', 0)
+            volumen = self.programa_actual.get('programa_riego', {}).get(f'volumen{i}', 0)
             porcentaje = volumen / self.volumen_total
             self.porcentajes.append(porcentaje)
 
     def assign_activities_to_slots(self):
         """
-        Asigna actividades de riego a cada franja horaria y camellón.
+        Asigna actividades de riego a cada franja horaria y camellón sin solapamientos.
         """
         self.cronograma_actividades = []
+        veces_por_dia = self.programa_actual.get('programa_riego', {}).get('veces_por_dia', 1)
+
         for slot_id, franja in self.franjas_horarias.items():
             inicio_franja = datetime.strptime(franja['inicio'], '%H:%M')
             fin_franja = datetime.strptime(franja['fin'], '%H:%M')
-            duracion_franja = (fin_franja - inicio_franja).total_seconds()
-            tiempo_agendado = 0
+            duracion_franja = fin_franja - inicio_franja
 
-            for i, porcentaje in enumerate(self.porcentajes):
-                if porcentaje == 0:
-                    continue
+            # Obtener camellones a regar en esta franja
+            camellones_a_regar = []
+            for i in range(1, 15):  # Camellones 1 a 14
+                volumen_total = self.programa_actual.get('programa_riego', {}).get(f'volumen{i}', 0)
+                if volumen_total > 0:
+                    camellones_a_regar.append(i)
 
-                duracion_riego = duracion_franja * porcentaje
-                inicio_riego = inicio_franja + timedelta(seconds=tiempo_agendado)
-                fin_riego = inicio_riego + timedelta(seconds=duracion_riego)
+            num_camellones = len(camellones_a_regar)
+            if num_camellones == 0:
+                continue  # No hay camellones para regar en esta franja horaria
 
-                # Obtener fertilizantes para el camellón actual
+            # Calcular duración por camellón
+            duracion_por_camellon = duracion_franja / num_camellones
+
+            for idx, i in enumerate(camellones_a_regar):
+                volumen_total = self.programa_actual.get('programa_riego', {}).get(f'volumen{i}', 0)
+                # Calcular volumen y fertilizantes por cada riego
+                volumen_por_vez = volumen_total / veces_por_dia
+                fertilizante1_total = self.programa_actual.get('programa_riego', {}).get(f'fertilizante1_{i}', 0)
+                fertilizante2_total = self.programa_actual.get('programa_riego', {}).get(f'fertilizante2_{i}', 0)
+                fertilizante1_por_vez = fertilizante1_total
+                fertilizante2_por_vez = fertilizante2_total
                 
-                fertilizante1 = (self.programa_actual.get('programa_riego')).get(f'fertilizante1_{i+1}', 0)
-                fertilizante2 = (self.programa_actual.get('programa_riego')).get(f'fertilizante2_{i+1}', 0)
+                # Calcular inicio y fin para este camellón
+                inicio_riego = inicio_franja + duracion_por_camellon * idx
+                fin_riego = inicio_riego + duracion_por_camellon
 
                 actividad = {
                     'inicio': inicio_riego.strftime('%H:%M'),
                     'fin': fin_riego.strftime('%H:%M'),
                     'accion': {
-                        'camellon': i + 1,
-                        
-                        'volumen': (self.programa_actual.get('programa_riego')).get(f'volumen{i+1}', 0),
-                        'fertilizante1': fertilizante1,
-                        'fertilizante2': fertilizante2
+                        'camellon': i,
+                        'volumen': volumen_por_vez,
+                        'fertilizante1': fertilizante1_por_vez,
+                        'fertilizante2': fertilizante2_por_vez
                     }
                 }
 
                 self.cronograma_actividades.append(actividad)
-                tiempo_agendado += duracion_riego
-
-            tiempo_agendado = 0  # Reiniciar para la siguiente franja horaria
 
     def save_cronograma_actividades(self):
         """
@@ -181,5 +187,5 @@ class Scheduler:
         Obtiene el último evento de riego ejecutado para reportarlo.
         """
         # Esta función debería obtener los datos del último riego para reportar
-        # Deberías mantener un registro de los eventos ejecutados
+        # Deberías mantener un registro de los eventos ejecutados integrados para ser reportados
         pass
