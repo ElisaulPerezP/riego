@@ -1,16 +1,31 @@
 from datetime import datetime, timedelta
 import json
+import threading
 import time
+import logging
+
+
+# Configuración del sistema de logging
+logging.basicConfig(
+    filename='scheduler.log',  # Archivo donde se guardarán los logs
+    filemode='a',        # 'a' para anexar, 'w' para sobrescribir
+    level=logging.DEBUG,  # Nivel mínimo de mensajes a registrar
+    format='%(asctime)s - %(levelname)s - %(message)s'  # Formato de salida
+)
+
 
 class Scheduler:
-    def __init__(self, programa_actual):
+    def __init__(self, programa_actual, gpio_manager):
         self.programa_actual = programa_actual
+        self.gpio_manager = gpio_manager  # Añadimos gpio_manager
         self.cronograma_actividades = []
         self.franjas_horarias = {}
         self.porcentajes = []
         self.volumen_total = 0
         self.intervalo_irrigacion_minutos = 5  # Puedes ajustar este valor si es necesario
         self.maximo_irrigaciones_hora = 5  # Puedes ajustar este valor si es necesario
+        self.last_event = None  # Para registrar el último evento
+        logging.debug("Scheduler iniciado mediante su constructor")
 
     def generate_cronograma(self):
         """
@@ -143,6 +158,8 @@ class Scheduler:
         """
         Carga el cronograma de actividades desde un archivo JSON.
         """
+        logging.debug("ingreso a load_cronograma_actividades")
+
         try:
             with open('cronograma_actividades.json', 'r') as f:
                 self.cronograma_actividades = json.load(f)
@@ -156,31 +173,54 @@ class Scheduler:
         """
         Ejecuta las actividades programadas en el cronograma.
         """
+        self.load_cronograma_actividades()
+        logging.debug("Inicia el run del scheduler")
+        logging.debug("El cronograma de actividades visible por el run de scheduler es: %s", self.cronograma_actividades)
+
         while True:
             now = datetime.now().strftime('%H:%M')
+
             for actividad in self.cronograma_actividades:
                 if actividad['inicio'] == now:
-                    # Ejecutar la acción programada
-                    self.execute_action(actividad['accion'])
+                    logging.debug("Se detectó el inicio de una actividad en el scheduler")
+
+                    # Ejecutar la acción programada en un hilo separado
+                    threading.Thread(target=self.execute_action, args=(actividad['accion'], actividad['fin'])).start()
             # Esperar un minuto antes de volver a comprobar
             time.sleep(60)
 
-    def execute_action(self, accion):
+    def execute_action(self, accion, fin_time_str):
         """
         Ejecuta una acción de riego en un camellón específico.
         """
+        logging.debug("Se está ejecutando una acción en el scheduler")
+
         camellon = accion['camellon']
         volumen = accion['volumen']
         fertilizante1 = accion['fertilizante1']
         fertilizante2 = accion['fertilizante2']
 
-        # Aquí llamarías a métodos del GPIOManager para controlar los pines
-        # Por ejemplo:
-        # self.gpio_manager.control_valve(camellon, 'ON')
-        # time.sleep(duracion_riego)
-        # self.gpio_manager.control_valve(camellon, 'OFF')
+        try:
+            # Ejecutar la acción de riego completa usando gpio_manager y pasar fin_time
+            self.gpio_manager.accion_riego_completa(camellon, volumen, fertilizante1, fertilizante2, fin_time_str)
 
-        print(f"Ejecutando riego en camellón {camellon} con volumen {volumen}.")
+            # Registrar el evento
+            self.last_event = {
+                'camellon': camellon,
+                'volumen': volumen,
+                'fertilizante1': fertilizante1,
+                'fertilizante2': fertilizante2,
+                'inicio': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                'fin': fin_time_str
+            }
+
+            logging.debug(f"Acción ejecutada exitosamente en camellón {camellon}")
+
+        except Exception as e:
+            logging.error(f"Error al ejecutar la acción en camellón {camellon}: {e}")
+
+        except Exception as e:
+            logging.error(f"Error al ejecutar la acción en camellón {camellon}: {e}")
 
     def get_last_event(self):
         """

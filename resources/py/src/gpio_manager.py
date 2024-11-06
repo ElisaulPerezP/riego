@@ -3,13 +3,28 @@
 import pigpio
 import threading
 import time
+import logging
+
+# Configuración del sistema de logging
+logging.basicConfig(
+    filename='gpio.log',  # Archivo donde se guardarán los logs
+    filemode='a',         # 'a' para anexar, 'w' para sobrescribir
+    level=logging.DEBUG,  # Nivel mínimo de mensajes a registrar
+    format='%(asctime)s - %(levelname)s - %(message)s'  # Formato de salida
+)
 
 class GPIOManager:
     def __init__(self, gpio_config):
         self.gpio_config = gpio_config  # Diccionario con las configuraciones de pines
         self.pi = pigpio.pi()
+
+        # Inicializar bloqueos para seguridad de hilos
+        self.flow_lock = threading.Lock()
+        self.level_lock = threading.Lock()
+        self.emergency_lock = threading.Lock()
+
         if not self.pi.connected:
-            print("Error: No se pudo conectar con el daemon de pigpio.")
+            logging.error("Error: No se pudo conectar con el daemon de pigpio.")
             exit()
 
         # Diccionarios para almacenar el estado de los sensores y actuadores
@@ -23,11 +38,7 @@ class GPIOManager:
         # Callbacks para los sensores de flujo
         self.flow_callbacks = []
         self.setup_flow_sensors()
-
-        # Bloqueos para seguridad de hilos
-        self.flow_lock = threading.Lock()
-        self.level_lock = threading.Lock()
-        self.emergency_lock = threading.Lock()
+        logging.debug("GPIOManager iniciado mediante su constructor")
 
     def setup_pins(self):
         """
@@ -55,8 +66,9 @@ class GPIOManager:
             self.pi.write(pin, 0)  # Inicialmente apagado
 
         # Válvula de llenado de tanques (lógica negativa)
-        self.pi.set_mode(self.gpio_config['valvulaTanquesLogicaNegativa'], pigpio.OUTPUT)
-        self.pi.write(self.gpio_config['valvulaTanquesLogicaNegativa'], 1)  # Inicialmente apagado (lógica negativa)
+        tanque_pin = self.gpio_config['valvulaTanquesLogicaNegativa']
+        self.pi.set_mode(tanque_pin, pigpio.OUTPUT)
+        self.pi.write(tanque_pin, 1)  # Inicialmente apagado
 
         # Configurar pines de sensores (entradas)
         # Sensores de flujo
@@ -70,8 +82,68 @@ class GPIOManager:
             self.pi.set_pull_up_down(pin, pigpio.PUD_DOWN)
 
         # Botón de parada de emergencia
-        self.pi.set_mode(self.gpio_config['parada'], pigpio.INPUT)
-        self.pi.set_pull_up_down(self.gpio_config['parada'], pigpio.PUD_UP)
+        parada_pin = self.gpio_config['parada']
+        self.pi.set_mode(parada_pin, pigpio.INPUT)
+        self.pi.set_pull_up_down(parada_pin, pigpio.PUD_UP)
+
+    # Resto de los métodos de la clase GPIOManager...
+
+# Asegúrate de que todos los métodos estén correctamente indentados dentro de la clase.
+
+
+    def accion_riego_completa(self, camellon, volumen, fertilizante1, fertilizante2, fin_time_str):
+        """
+        Ejecuta la acción de riego completa en un camellón específico con control de volumen y fertilizante.
+        """
+        logging.debug(f"Iniciando riego en camellón {camellon}")
+        self.control_valve(camellon, 'ON')
+        volumen_actual = 0
+        FACTOR_CONVERSION_FLUJO = 0.1  # Ajusta según sea necesario
+
+        # Convertir fin_time_str a un objeto datetime
+        from datetime import datetime, timedelta
+
+        # Convertir fin_time_str a un objeto datetime considerando el día actual
+        fin_time = datetime.strptime(fin_time_str, '%H:%M').time()
+        now = datetime.now()
+        fin_datetime = datetime.combine(now.date(), fin_time)
+
+        # Si fin_datetime es anterior o igual a now, significa que la hora de fin es al día siguiente
+        if fin_datetime <= now:
+            fin_datetime += timedelta(days=1)
+
+        # Controlar flujo y fertilizantes
+        while volumen_actual < volumen:
+            flujo = self.read_flow_counts()[0]  # Leer el flujo correspondiente
+            volumen_actual += flujo * FACTOR_CONVERSION_FLUJO
+            time.sleep(1)
+
+            # Verificar si se alcanzó la hora de finalización
+            now = datetime.now()
+            if now >= fin_datetime:
+                logging.debug(f"Tiempo de riego alcanzado para camellón {camellon}. Volumen alcanzado: {volumen_actual}")
+                break
+
+        # Apagar la válvula del camellón
+        self.control_valve(camellon, 'OFF')
+
+        logging.debug(f"Riego en camellón {camellon} completado. Volumen alcanzado: {volumen_actual}")
+
+        # Manejo de fertilizantes
+        # Asumiendo que los fertilizantes deben ser aplicados incluso si el tiempo de riego ha terminado
+        if fertilizante1 > 0:
+            logging.debug(f"Iniciando aplicación de fertilizante 1 en camellón {camellon}")
+            self.control_injector(1, 'ON')
+            time.sleep(fertilizante1)
+            self.control_injector(1, 'OFF')
+            logging.debug(f"Aplicación de fertilizante 1 completada en camellón {camellon}")
+
+        if fertilizante2 > 0:
+            logging.debug(f"Iniciando aplicación de fertilizante 2 en camellón {camellon}")
+            self.control_injector(2, 'ON')
+            time.sleep(fertilizante2)
+            self.control_injector(2, 'OFF')
+            logging.debug(f"Aplicación de fertilizante 2 completada en camellón {camellon}")
 
     def setup_flow_sensors(self):
         """
@@ -142,28 +214,24 @@ class GPIOManager:
         # Cerrar válvula de llenado de tanques
         self.pi.write(self.gpio_config['valvulaTanquesLogicaNegativa'], 1)
 
+
     def control_valve(self, camellon_number, action):
         """
         Controla una electrovalvula específica.
-
-        :param camellon_number: Número del camellón (1 a 14)
-        :param action: 'ON' para abrir, 'OFF' para cerrar
         """
         pin = None
-        if camellon_number in range(1, 15):
-            if camellon_number in self.gpio_config['camellones_indices']:
-                index = self.gpio_config['camellones_indices'].index(camellon_number)
-                pin = self.gpio_config['camellones'][index]
-                logic = 'positive'
-            elif camellon_number in self.gpio_config['camellonesLogicaNegativa_indices']:
-                index = self.gpio_config['camellonesLogicaNegativa_indices'].index(camellon_number)
-                pin = self.gpio_config['camellonesLogicaNegativa'][index]
-                logic = 'negative'
-            else:
-                print(f"Camellón {camellon_number} no encontrado en la configuración.")
-                return
+        logic = None
+
+        if camellon_number in self.gpio_config['camellones_indices']:
+            index = self.gpio_config['camellones_indices'].index(camellon_number)
+            pin = self.gpio_config['camellones'][index]
+            logic = 'positive'
+        elif camellon_number in self.gpio_config['camellonesLogicaNegativa_indices']:
+            index = self.gpio_config['camellonesLogicaNegativa_indices'].index(camellon_number)
+            pin = self.gpio_config['camellonesLogicaNegativa'][index]
+            logic = 'negative'
         else:
-            print("Número de camellón inválido.")
+            logging.error(f"Camellón {camellon_number} no encontrado en la configuración.")
             return
 
         if action == 'ON':
@@ -177,7 +245,8 @@ class GPIOManager:
             else:
                 self.pi.write(pin, 1)
         else:
-            print("Acción inválida para control de válvula.")
+            logging.error(f"Acción inválida para control de válvula: {action}")
+
 
     def control_pump(self, pump_number, action):
         """
@@ -234,8 +303,9 @@ class GPIOManager:
         Devuelve los estados actuales de los sensores de nivel.
         """
         with self.level_lock:
-            states = self.level_states.copy()
-        return states
+            return self.level_states.copy()
+
+
 
     def run(self):
         """
@@ -257,3 +327,8 @@ class GPIOManager:
         for cb in self.flow_callbacks:
             cb.cancel()
         self.pi.stop()
+
+
+if __name__ == '__main__':
+    controller = GPIOManager()
+    controller.setup_pins()

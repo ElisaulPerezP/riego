@@ -7,14 +7,26 @@ from communication_manager import CommunicationManager
 from scheduler import Scheduler
 from gpio_manager import GPIOManager
 from datetime import datetime
+import logging
+
+# Configuración del sistema de logging
+logging.basicConfig(
+    filename='main.log',  # Archivo donde se guardarán los logs
+    filemode='a',        # 'a' para anexar, 'w' para sobrescribir
+    level=logging.DEBUG,  # Nivel mínimo de mensajes a registrar
+    format='%(asctime)s - %(levelname)s - %(message)s'  # Formato de salida
+)
+
 
 
 class MainController:
     def __init__(self):
         # Inicializar componentes
         self.config_loader = ConfigLoader()
+        self.programa_actual = self.config_loader.programa_actual
+        self.gpio_manager = None  # Inicialmente None
+        self.scheduler = None  # Inicialmente None
         self.communication_manager = None
-        self.gpio_manager = None
         self.flags = {
             'flagArchivoProgramaActual': False,
             'flagArchivoCronogramaActividades': False,
@@ -26,7 +38,8 @@ class MainController:
             'flagProgramaListo': False,
             'flagCronogramaListo': False
         }
-        self.scheduler = Scheduler(self.config_loader.programa_actual)
+
+        logging.debug("Controlador principal iniciado mediante su constructor")
 
 
     def start(self):
@@ -47,7 +60,7 @@ class MainController:
         hilo_comunicacion = threading.Thread(target=self.communication_loop)
         hilo_scheduler = threading.Thread(target=self.scheduler.run)
         hilo_emergency_stop = threading.Thread(target=self.gpio_manager.monitor_emergency_stop)
-
+        
         # Establecer los hilos como demonios
         hilo_gpio.daemon = True
         hilo_comunicacion.daemon = True
@@ -59,7 +72,6 @@ class MainController:
         hilo_comunicacion.start()
         hilo_scheduler.start()
         hilo_emergency_stop.start()
-
         # Mantener el programa en ejecución
         try:
             while True:
@@ -99,7 +111,7 @@ class MainController:
         self.prepare_flags()
 
         # Inicializar el Scheduler
-        self.scheduler = Scheduler(self.programa_actual)
+        self.scheduler = Scheduler(self.programa_actual, self.gpio_manager)
 
         # Generar el cronograma si es necesario
         if not self.flags['flagCronogramaListo'] and self.flags['flagArchivoProgramaActual']:
@@ -167,7 +179,7 @@ class MainController:
                     elif accion == "reportarRiego":
                         # Obtener el último evento de riego y reportarlo
                         evento_riego = self.scheduler.get_last_event()
-                        self.communication_manager.report_event(evento_riego)
+                        #self.communication_manager.report_event(evento_riego)
             time.sleep(60)  # Esperar un minuto antes de volver a comprobar
             
 if __name__ == '__main__':
