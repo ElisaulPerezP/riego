@@ -44,10 +44,14 @@ class Scheduler:
             # Paso 4: Guardar el cronograma en un archivo (opcional)
             self.save_cronograma_actividades()
 
+            logging.debug(f"Se genero el cronograma de actividades: {self.cronograma_actividades}")
+
             # Si todos los pasos se ejecutaron correctamente
             return True
 
         except Exception as e:
+            logging.debug("no se genero el cronograma de actividades")
+
             print(f"Error al generar el cronograma de actividades: {e}")
             return False
 
@@ -169,25 +173,32 @@ class Scheduler:
             print("Error al cargar el cronograma de actividades.")
             return False
 
+
     def run(self):
         """
         Ejecuta las actividades programadas en el cronograma.
         """
-        self.load_cronograma_actividades()
-        logging.debug("Inicia el run del scheduler")
-        logging.debug("El cronograma de actividades visible por el run de scheduler es: %s", self.cronograma_actividades)
+        last_load_time = datetime.now() - timedelta(minutes=10)
 
         while True:
-            now = datetime.now().strftime('%H:%M')
+            now = datetime.now()
+            current_time_str = now.strftime('%H:%M')
+
+            # Verificar si han pasado al menos 10 minutos desde la última carga
+            if (now - last_load_time).total_seconds() >= 600:
+                self.load_cronograma_actividades()
+                last_load_time = now
+                logging.debug("Cronograma de actividades recargado en el Scheduler.")
 
             for actividad in self.cronograma_actividades:
-                if actividad['inicio'] == now:
+                if actividad['inicio'] == current_time_str:
                     logging.debug("Se detectó el inicio de una actividad en el scheduler")
-
                     # Ejecutar la acción programada en un hilo separado
                     threading.Thread(target=self.execute_action, args=(actividad['accion'], actividad['fin'])).start()
+
             # Esperar un minuto antes de volver a comprobar
             time.sleep(60)
+
 
     def execute_action(self, accion, fin_time_str):
         """

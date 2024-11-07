@@ -173,7 +173,7 @@ class MainController:
                 if inicio <= current_time <= finalizacion:
                     if accion == "consultarPrograma":
                         self.attempt_communication()
-                        self.scheduler = Scheduler(self.programa_actual)
+                        self.scheduler = Scheduler(self.programa_actual, self.gpio_manager)
                         # Generar un nuevo cronograma de actividades
                         cronograma_generado = self.scheduler.generate_cronograma()
                     elif accion == "reportarRiego":
