@@ -258,7 +258,7 @@ class Scheduler:
         """
         Restablece todos los valores del payload a sus valores iniciales.
         """
-        self.payload = {
+        self.payload_event = {
             # Campos de volumen para los 14 surcos
             **{f'volumen{i}': 0 for i in range(1, 15)},
             # Campos de tiempo para los 14 surcos
