@@ -3662,3 +3662,188 @@
 2024-11-07 02:50:00,533 - DEBUG - Tiempo de riego alcanzado. Hora actual: 2024-11-07 02:50:00.533361.
 2024-11-07 02:50:00,535 - ERROR - Camellón 12 no encontrado en la configuración.
 2024-11-07 02:50:00,536 - DEBUG - Válvula del camellón 12 cerrada.
+2024-11-07 02:50:08,534 - DEBUG - Finalizando PWM para fertilizante 2.
+2024-11-07 02:50:08,536 - DEBUG - Finalizando PWM para fertilizante 1.
+2024-11-07 02:50:08,540 - DEBUG - Riego en camellón 12 finalizado.
+2024-11-07 02:50:08,541 - DEBUG - Acción ejecutada exitosamente en camellón 12
+2024-11-07 02:50:58,522 - DEBUG - Se detectó el inicio de una actividad en el scheduler
+2024-11-07 02:50:58,523 - DEBUG - Se está ejecutando una acción en el scheduler
+2024-11-07 02:50:58,525 - DEBUG - Iniciando riego en camellón 13
+2024-11-07 02:50:58,527 - ERROR - Camellón 13 no encontrado en la configuración.
+2024-11-07 02:50:58,527 - DEBUG - Inicio de conteo de flujo. Volumen objetivo: 0.25.
+2024-11-07 02:50:58,528 - DEBUG - Válvula del camellón 13 abierta.
+2024-11-07 02:50:58,529 - DEBUG - Iniciando inyección de fertilizantes con PWM.
+2024-11-07 02:50:58,529 - DEBUG - Volumen actual: 0.0.
+2024-11-07 02:50:58,531 - DEBUG - Iniciando PWM para fertilizante 1.
+2024-11-07 02:50:58,532 - DEBUG - Iniciando PWM para fertilizante 2.
+2024-11-07 02:50:59,531 - DEBUG - Volumen actual: 0.0.
+2024-11-07 02:51:00,532 - DEBUG - Volumen actual: 0.0.
+2024-11-07 02:51:00,533 - DEBUG - Tiempo de riego alcanzado. Hora actual: 2024-11-07 02:51:00.533368.
+2024-11-07 02:51:00,534 - ERROR - Camellón 13 no encontrado en la configuración.
+2024-11-07 02:51:00,534 - DEBUG - Válvula del camellón 13 cerrada.
+2024-11-07 02:51:08,534 - DEBUG - Finalizando PWM para fertilizante 1.
+2024-11-07 02:51:08,535 - DEBUG - Finalizando PWM para fertilizante 2.
+2024-11-07 02:51:08,536 - DEBUG - Riego en camellón 13 finalizado.
+2024-11-07 02:51:08,537 - DEBUG - Acción ejecutada exitosamente en camellón 13
+2024-11-07 02:51:58,525 - DEBUG - Se detectó el inicio de una actividad en el scheduler
+2024-11-07 02:51:58,527 - DEBUG - Se está ejecutando una acción en el scheduler
+2024-11-07 02:51:58,527 - DEBUG - Iniciando riego en camellón 14
+2024-11-07 02:51:58,531 - ERROR - Camellón 14 no encontrado en la configuración.
+2024-11-07 02:51:58,532 - DEBUG - Inicio de conteo de flujo. Volumen objetivo: 0.25.
+2024-11-07 02:51:58,533 - DEBUG - Volumen actual: 0.0.
+2024-11-07 02:51:58,532 - DEBUG - Válvula del camellón 14 abierta.
+2024-11-07 02:51:58,534 - DEBUG - Iniciando inyección de fertilizantes con PWM.
+2024-11-07 02:51:58,536 - DEBUG - Iniciando PWM para fertilizante 1.
+2024-11-07 02:51:58,537 - DEBUG - Iniciando PWM para fertilizante 2.
+2024-11-07 02:51:59,534 - DEBUG - Volumen actual: 0.0.
+2024-11-07 02:52:00,535 - DEBUG - Volumen actual: 0.0.
+2024-11-07 02:52:00,536 - DEBUG - Tiempo de riego alcanzado. Hora actual: 2024-11-07 02:52:00.535856.
+2024-11-07 02:52:00,536 - ERROR - Camellón 14 no encontrado en la configuración.
+2024-11-07 02:52:00,537 - DEBUG - Válvula del camellón 14 cerrada.
+2024-11-07 02:52:08,539 - DEBUG - Finalizando PWM para fertilizante 1.
+2024-11-07 02:52:08,539 - DEBUG - Finalizando PWM para fertilizante 2.
+2024-11-07 02:52:08,541 - DEBUG - Riego en camellón 14 finalizado.
+2024-11-07 02:52:08,542 - DEBUG - Acción ejecutada exitosamente en camellón 14
+2024-11-07 02:52:58,530 - DEBUG - Se detectó el inicio de una actividad en el scheduler
+2024-11-07 02:52:58,531 - DEBUG - Se está ejecutando una acción en el scheduler
+2024-11-07 02:52:58,533 - DEBUG - Iniciando riego en camellón 1
+2024-11-07 02:52:58,536 - DEBUG - Inicio de conteo de flujo. Volumen objetivo: 0.25.
+2024-11-07 02:52:58,538 - DEBUG - Iniciando inyección de fertilizantes con PWM.
+2024-11-07 02:52:58,538 - DEBUG - Volumen actual: 0.0.
+2024-11-07 02:52:58,539 - DEBUG - Válvula del camellón 1 abierta.
+2024-11-07 02:52:58,540 - DEBUG - Iniciando PWM para fertilizante 1.
+2024-11-07 02:52:58,541 - DEBUG - Iniciando PWM para fertilizante 2.
+2024-11-07 02:52:59,542 - DEBUG - Volumen actual: 0.0.
+2024-11-07 02:53:00,543 - DEBUG - Volumen actual: 0.0.
+2024-11-07 02:53:00,544 - DEBUG - Tiempo de riego alcanzado. Hora actual: 2024-11-07 02:53:00.543915.
+2024-11-07 02:53:00,546 - DEBUG - Válvula del camellón 1 cerrada.
+2024-11-07 02:53:08,544 - DEBUG - Finalizando PWM para fertilizante 1.
+2024-11-07 02:53:08,545 - DEBUG - Finalizando PWM para fertilizante 2.
+2024-11-07 02:53:08,546 - DEBUG - Riego en camellón 1 finalizado.
+2024-11-07 02:53:08,546 - DEBUG - Acción ejecutada exitosamente en camellón 1
+2024-11-07 02:53:58,534 - DEBUG - Se detectó el inicio de una actividad en el scheduler
+2024-11-07 02:53:58,535 - DEBUG - Se está ejecutando una acción en el scheduler
+2024-11-07 02:53:58,537 - DEBUG - Iniciando riego en camellón 2
+2024-11-07 02:53:58,540 - DEBUG - Inicio de conteo de flujo. Volumen objetivo: 0.25.
+2024-11-07 02:53:58,540 - DEBUG - Válvula del camellón 2 abierta.
+2024-11-07 02:53:58,541 - DEBUG - Iniciando inyección de fertilizantes con PWM.
+2024-11-07 02:53:58,542 - DEBUG - Volumen actual: 0.0.
+2024-11-07 02:53:58,544 - DEBUG - Iniciando PWM para fertilizante 1.
+2024-11-07 02:53:58,546 - DEBUG - Iniciando PWM para fertilizante 2.
+2024-11-07 02:53:59,545 - DEBUG - Volumen actual: 0.0.
+2024-11-07 02:54:00,546 - DEBUG - Volumen actual: 0.0.
+2024-11-07 02:54:00,546 - DEBUG - Tiempo de riego alcanzado. Hora actual: 2024-11-07 02:54:00.546592.
+2024-11-07 02:54:00,548 - DEBUG - Válvula del camellón 2 cerrada.
+2024-11-07 02:54:08,547 - DEBUG - Finalizando PWM para fertilizante 1.
+2024-11-07 02:54:08,548 - DEBUG - Finalizando PWM para fertilizante 2.
+2024-11-07 02:54:08,549 - DEBUG - Riego en camellón 2 finalizado.
+2024-11-07 02:54:08,550 - DEBUG - Acción ejecutada exitosamente en camellón 2
+2024-11-07 02:54:58,538 - DEBUG - Se detectó el inicio de una actividad en el scheduler
+2024-11-07 02:54:58,539 - DEBUG - Se está ejecutando una acción en el scheduler
+2024-11-07 02:54:58,541 - DEBUG - Iniciando riego en camellón 3
+2024-11-07 02:54:58,543 - DEBUG - Inicio de conteo de flujo. Volumen objetivo: 0.25.
+2024-11-07 02:54:58,545 - DEBUG - Iniciando inyección de fertilizantes con PWM.
+2024-11-07 02:54:58,545 - DEBUG - Volumen actual: 0.0.
+2024-11-07 02:54:58,545 - DEBUG - Válvula del camellón 3 abierta.
+2024-11-07 02:54:58,547 - DEBUG - Iniciando PWM para fertilizante 1.
+2024-11-07 02:54:58,549 - DEBUG - Iniciando PWM para fertilizante 2.
+2024-11-07 02:54:59,548 - DEBUG - Volumen actual: 0.0.
+2024-11-07 02:55:00,549 - DEBUG - Volumen actual: 0.0.
+2024-11-07 02:55:00,550 - DEBUG - Tiempo de riego alcanzado. Hora actual: 2024-11-07 02:55:00.550156.
+2024-11-07 02:55:00,551 - DEBUG - Válvula del camellón 3 cerrada.
+2024-11-07 02:55:08,551 - DEBUG - Finalizando PWM para fertilizante 1.
+2024-11-07 02:55:08,552 - DEBUG - Finalizando PWM para fertilizante 2.
+2024-11-07 02:55:08,553 - DEBUG - Riego en camellón 3 finalizado.
+2024-11-07 02:55:08,554 - DEBUG - Acción ejecutada exitosamente en camellón 3
+2024-11-07 02:55:58,542 - DEBUG - Se detectó el inicio de una actividad en el scheduler
+2024-11-07 02:55:58,543 - DEBUG - Se está ejecutando una acción en el scheduler
+2024-11-07 02:55:58,543 - DEBUG - Iniciando riego en camellón 4
+2024-11-07 02:55:58,547 - DEBUG - Inicio de conteo de flujo. Volumen objetivo: 0.25.
+2024-11-07 02:55:58,548 - DEBUG - Válvula del camellón 4 abierta.
+2024-11-07 02:55:58,548 - DEBUG - Volumen actual: 0.0.
+2024-11-07 02:55:58,549 - DEBUG - Iniciando inyección de fertilizantes con PWM.
+2024-11-07 02:55:58,551 - DEBUG - Iniciando PWM para fertilizante 1.
+2024-11-07 02:55:58,553 - DEBUG - Iniciando PWM para fertilizante 2.
+2024-11-07 02:55:59,550 - DEBUG - Volumen actual: 0.0.
+2024-11-07 02:56:00,551 - DEBUG - Volumen actual: 0.0.
+2024-11-07 02:56:00,552 - DEBUG - Tiempo de riego alcanzado. Hora actual: 2024-11-07 02:56:00.552505.
+2024-11-07 02:56:00,553 - DEBUG - Válvula del camellón 4 cerrada.
+2024-11-07 02:56:08,554 - DEBUG - Finalizando PWM para fertilizante 1.
+2024-11-07 02:56:08,555 - DEBUG - Finalizando PWM para fertilizante 2.
+2024-11-07 02:56:08,557 - DEBUG - Riego en camellón 4 finalizado.
+2024-11-07 02:56:08,557 - DEBUG - Acción ejecutada exitosamente en camellón 4
+2024-11-07 02:56:58,546 - DEBUG - Se detectó el inicio de una actividad en el scheduler
+2024-11-07 02:56:58,547 - DEBUG - Se está ejecutando una acción en el scheduler
+2024-11-07 02:56:58,550 - DEBUG - Iniciando riego en camellón 5
+2024-11-07 02:56:58,552 - DEBUG - Inicio de conteo de flujo. Volumen objetivo: 0.25.
+2024-11-07 02:56:58,553 - DEBUG - Válvula del camellón 5 abierta.
+2024-11-07 02:56:58,553 - DEBUG - Volumen actual: 0.0.
+2024-11-07 02:56:58,554 - DEBUG - Iniciando inyección de fertilizantes con PWM.
+2024-11-07 02:56:58,556 - DEBUG - Iniciando PWM para fertilizante 1.
+2024-11-07 02:56:58,557 - DEBUG - Iniciando PWM para fertilizante 2.
+2024-11-07 02:56:59,555 - DEBUG - Volumen actual: 0.0.
+2024-11-07 02:57:00,556 - DEBUG - Volumen actual: 0.0.
+2024-11-07 02:57:00,557 - DEBUG - Tiempo de riego alcanzado. Hora actual: 2024-11-07 02:57:00.557397.
+2024-11-07 02:57:00,558 - DEBUG - Válvula del camellón 5 cerrada.
+2024-11-07 02:57:08,558 - DEBUG - Finalizando PWM para fertilizante 1.
+2024-11-07 02:57:08,559 - DEBUG - Finalizando PWM para fertilizante 2.
+2024-11-07 02:57:08,561 - DEBUG - Riego en camellón 5 finalizado.
+2024-11-07 02:57:08,562 - DEBUG - Acción ejecutada exitosamente en camellón 5
+2024-11-07 02:57:58,550 - DEBUG - Se detectó el inicio de una actividad en el scheduler
+2024-11-07 02:57:58,551 - DEBUG - Se está ejecutando una acción en el scheduler
+2024-11-07 02:57:58,554 - DEBUG - Iniciando riego en camellón 6
+2024-11-07 02:57:58,556 - DEBUG - Válvula del camellón 6 abierta.
+2024-11-07 02:57:58,557 - DEBUG - Inicio de conteo de flujo. Volumen objetivo: 0.25.
+2024-11-07 02:57:58,558 - DEBUG - Iniciando inyección de fertilizantes con PWM.
+2024-11-07 02:57:58,559 - DEBUG - Volumen actual: 0.0.
+2024-11-07 02:57:58,560 - DEBUG - Iniciando PWM para fertilizante 1.
+2024-11-07 02:57:58,562 - DEBUG - Iniciando PWM para fertilizante 2.
+2024-11-07 02:57:59,560 - DEBUG - Volumen actual: 0.0.
+2024-11-07 02:58:00,561 - DEBUG - Volumen actual: 0.0.
+2024-11-07 02:58:00,562 - DEBUG - Tiempo de riego alcanzado. Hora actual: 2024-11-07 02:58:00.562404.
+2024-11-07 02:58:00,563 - DEBUG - Válvula del camellón 6 cerrada.
+2024-11-07 02:58:08,563 - DEBUG - Finalizando PWM para fertilizante 1.
+2024-11-07 02:58:08,564 - DEBUG - Finalizando PWM para fertilizante 2.
+2024-11-07 02:58:08,566 - DEBUG - Riego en camellón 6 finalizado.
+2024-11-07 02:58:08,567 - DEBUG - Acción ejecutada exitosamente en camellón 6
+2024-11-07 02:58:56,720 - DEBUG - Controlador principal iniciado mediante su constructor
+2024-11-07 02:58:57,153 - DEBUG - GPIOManager iniciado mediante su constructor
+2024-11-07 02:58:57,154 - DEBUG - Scheduler iniciado mediante su constructor
+2024-11-07 02:58:57,161 - DEBUG - ingreso a load_cronograma_actividades
+2024-11-07 02:58:57,212 - DEBUG - Cronograma de actividades recargado en el Scheduler.
+2024-11-07 02:58:57,213 - DEBUG - Se detectó el inicio de una actividad en el scheduler
+2024-11-07 02:58:57,215 - DEBUG - Se está ejecutando una acción en el scheduler
+2024-11-07 02:58:57,217 - DEBUG - Iniciando riego en camellón 7
+2024-11-07 02:58:57,221 - DEBUG - Inicio de conteo de flujo. Volumen objetivo: 0.25.
+2024-11-07 02:58:57,222 - DEBUG - Válvula del camellón 7 abierta.
+2024-11-07 02:58:57,222 - DEBUG - Volumen actual: 0.0.
+2024-11-07 02:58:57,224 - DEBUG - Iniciando inyección de fertilizantes con PWM.
+2024-11-07 02:58:57,225 - DEBUG - Iniciando PWM para fertilizante 1.
+2024-11-07 02:58:57,227 - DEBUG - Iniciando PWM para fertilizante 2.
+2024-11-07 02:58:58,224 - DEBUG - Volumen actual: 0.0.
+2024-11-07 02:58:59,225 - DEBUG - Volumen actual: 0.0.
+2024-11-07 02:59:00,226 - DEBUG - Volumen actual: 0.0.
+2024-11-07 02:59:00,227 - DEBUG - Tiempo de riego alcanzado. Hora actual: 2024-11-07 02:59:00.227457.
+2024-11-07 02:59:00,229 - DEBUG - Válvula del camellón 7 cerrada.
+2024-11-07 02:59:07,229 - DEBUG - Finalizando PWM para fertilizante 1.
+2024-11-07 02:59:07,230 - DEBUG - Finalizando PWM para fertilizante 2.
+2024-11-07 02:59:07,231 - DEBUG - Riego en camellón 7 finalizado.
+2024-11-07 02:59:07,232 - DEBUG - Acción ejecutada exitosamente en camellón 7
+2024-11-07 02:59:57,218 - DEBUG - Se detectó el inicio de una actividad en el scheduler
+2024-11-07 02:59:57,219 - DEBUG - Se está ejecutando una acción en el scheduler
+2024-11-07 02:59:57,220 - DEBUG - Iniciando riego en camellón 8
+2024-11-07 02:59:57,225 - DEBUG - Válvula del camellón 8 abierta.
+2024-11-07 02:59:57,226 - DEBUG - Inicio de conteo de flujo. Volumen objetivo: 0.25.
+2024-11-07 02:59:57,227 - DEBUG - Volumen actual: 0.0.
+2024-11-07 02:59:57,228 - DEBUG - Iniciando inyección de fertilizantes con PWM.
+2024-11-07 02:59:57,230 - DEBUG - Iniciando PWM para fertilizante 1.
+2024-11-07 02:59:57,233 - DEBUG - Iniciando PWM para fertilizante 2.
+2024-11-07 02:59:58,228 - DEBUG - Volumen actual: 0.0.
+2024-11-07 02:59:59,229 - DEBUG - Volumen actual: 0.0.
+2024-11-07 03:00:00,230 - DEBUG - Volumen actual: 0.0.
+2024-11-07 03:00:00,231 - DEBUG - Tiempo de riego alcanzado. Hora actual: 2024-11-07 03:00:00.231388.
+2024-11-07 03:00:00,233 - DEBUG - Válvula del camellón 8 cerrada.
+2024-11-07 03:00:07,234 - DEBUG - Finalizando PWM para fertilizante 1.
+2024-11-07 03:00:07,236 - DEBUG - Finalizando PWM para fertilizante 2.
+2024-11-07 03:00:07,237 - DEBUG - Riego en camellón 8 finalizado.
+2024-11-07 03:00:07,238 - DEBUG - Acción ejecutada exitosamente en camellón 8

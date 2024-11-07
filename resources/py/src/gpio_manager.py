@@ -181,21 +181,21 @@ class GPIOManager:
         """
         Hilo que controla la inyección de fertilizantes durante el riego.
         """
-        # Cargar parámetros PWM desde las variables de entorno o usar valores por defecto
+        # Dividir fertilizante1 y fertilizante2 entre 10 para definir los ciclos de trabajo
+        duty_cycle1 = fertilizante1 / 10.0  # Convertir a un valor entre 0.0 y 1.0
+        duty_cycle2 = fertilizante2 / 10.0  # Convertir a un valor entre 0.0 y 1.0
+
+        # Cargar frecuencias PWM desde las variables de entorno o usar valores por defecto
         try:
-            duty_cycle1 = float(os.environ.get('PWM_FERTILIZER1_DUTY_CYCLE', '0.5'))  # 50% por defecto
-            frequency1 = float(os.environ.get('PWM_FERTILIZER1_FREQUENCY', '0.1')) 
+            frequency1 = float(os.environ.get('PWM_FERTILIZER1_FREQUENCY', '0.1'))
         except ValueError:
-            logging.error("Valores de PWM de fertilizante 1 no válidos. Usando valores por defecto.")
-            duty_cycle1 = 0.5
+            logging.error("Valor de frecuencia de fertilizante 1 no válido. Usando valor por defecto.")
             frequency1 = 1.0
 
         try:
-            duty_cycle2 = float(os.environ.get('PWM_FERTILIZER2_DUTY_CYCLE', '0.5'))
             frequency2 = float(os.environ.get('PWM_FERTILIZER2_FREQUENCY', '0.1'))
         except ValueError:
-            logging.error("Valores de PWM de fertilizante 2 no válidos. Usando valores por defecto.")
-            duty_cycle2 = 0.5
+            logging.error("Valor de frecuencia de fertilizante 2 no válido. Usando valor por defecto.")
             frequency2 = 1.0
 
         # Cálculo de periodos
@@ -251,7 +251,6 @@ class GPIOManager:
         # Esperar a que los hilos PWM terminen
         for t in threads:
             t.join()
-
 
     def setup_flow_sensors(self):
         """
