@@ -22,63 +22,37 @@ class ReporteRiegoApiController extends Controller
      */
     public function store(Request $request)
     {
-    // Validamos los datos recibidos
-    $request->validate([
-        // Validación para los 14 campos de volumen
-        'volumen1' => 'required|numeric',
-        'volumen2' => 'required|numeric',
-        'volumen3' => 'required|numeric',
-        'volumen4' => 'required|numeric',
-        'volumen5' => 'required|numeric',
-        'volumen6' => 'required|numeric',
-        'volumen7' => 'required|numeric',
-        'volumen8' => 'required|numeric',
-        'volumen9' => 'required|numeric',
-        'volumen10' => 'required|numeric',
-        'volumen11' => 'required|numeric',
-        'volumen12' => 'required|numeric',
-        'volumen13' => 'required|numeric',
-        'volumen14' => 'required|numeric',
-
-        // Validación para los 14 campos de tiempo (con formato HH:mm)
-        'tiempo1' => 'required|date_format:H:i:s',
-        'tiempo2' => 'required|date_format:H:i:s',
-        'tiempo3' => 'required|date_format:H:i:s',
-        'tiempo4' => 'required|date_format:H:i:s',
-        'tiempo5' => 'required|date_format:H:i:s',
-        'tiempo6' => 'required|date_format:H:i:s',
-        'tiempo7' => 'required|date_format:H:i:s',
-        'tiempo8' => 'required|date_format:H:i:s',
-        'tiempo9' => 'required|date_format:H:i:s',
-        'tiempo10' => 'required|date_format:H:i:s',
-        'tiempo11' => 'required|date_format:H:i:s',
-        'tiempo12' => 'required|date_format:H:i:s',
-        'tiempo13' => 'required|date_format:H:i:s',
-        'tiempo14' => 'required|date_format:H:i:s',
-
-        // Validación para los 14 campos de mensaje (puede ser nulo y debe ser una cadena si está presente)
-        'mensaje1' => 'nullable|string',
-        'mensaje2' => 'nullable|string',
-        'mensaje3' => 'nullable|string',
-        'mensaje4' => 'nullable|string',
-        'mensaje5' => 'nullable|string',
-        'mensaje6' => 'nullable|string',
-        'mensaje7' => 'nullable|string',
-        'mensaje8' => 'nullable|string',
-        'mensaje9' => 'nullable|string',
-        'mensaje10' => 'nullable|string',
-        'mensaje11' => 'nullable|string',
-        'mensaje12' => 'nullable|string',
-        'mensaje13' => 'nullable|string',
-        'mensaje14' => 'nullable|string',
-    ]);
-
-
-        // Creamos el reporte de riego
-        $reporte = ReporteRiego::create($request->all());
-
+        // Decodificar el JSON manualmente si no se está interpretando automáticamente
+        $data = $request->json()->all();
+        // Convertir los tiempos de segundos a formato HH:MM:SS.uuu
+        $tiemposConvertidos = [];
+        for ($i = 1; $i <= 14; $i++) {
+            $campoTiempo = "tiempo{$i}";
+            $segundos = $data[$campoTiempo];
+    
+            if (!is_numeric($segundos) || $segundos < 0) {
+                return response()->json([
+                    'error' => "El campo {$campoTiempo} debe ser un número positivo."
+                ], 422);
+            }
+    
+            $horas = floor($segundos / 3600);
+            $minutos = floor(($segundos % 3600) / 60);
+            $segundosRestantes = $segundos % 60;
+            $tiempoFormato = sprintf('%02d:%02d:%06.3f', $horas, $minutos, $segundosRestantes);
+            $tiemposConvertidos[$campoTiempo] = $tiempoFormato;
+        }
+    
+        // Fusionar los tiempos convertidos con el array de datos
+        $data = array_merge($data, $tiemposConvertidos);
+    
+        // Crear el reporte de riego usando los datos convertidos
+        $reporte = ReporteRiego::create($data);
+    
         return response()->json($reporte, 201); // Retorna el reporte creado con código 201
     }
+    
+    
 
     /**
      * Muestra un reporte de riego específico.

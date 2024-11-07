@@ -25,6 +25,17 @@ class Scheduler:
         self.intervalo_irrigacion_minutos = 5  # Puedes ajustar este valor si es necesario
         self.maximo_irrigaciones_hora = 5  # Puedes ajustar este valor si es necesario
         self.last_event = None  # Para registrar el último evento
+        self.payload_event = {
+            # Campos de volumen para los 14 surcos
+            **{f'volumen{i}': 0 for i in range(1, 15)},
+            # Campos de tiempo para los 14 surcos
+            **{f'tiempo{i}': 0 for i in range(1, 15)},
+            # Campos de fertilizantes para los 14 surcos (último valor registrado)
+            **{f'fertilizante1_{i}': 0 for i in range(1, 15)},
+            **{f'fertilizante2_{i}': 0 for i in range(1, 15)},
+            # Campos de mensaje para los 14 surcos (inicialmente vacíos)
+            **{f'mensaje{i}': '' for i in range(1, 15)}
+        }
         logging.debug("Scheduler iniciado mediante su constructor")
 
     def generate_cronograma(self):
@@ -202,7 +213,7 @@ class Scheduler:
 
     def execute_action(self, accion, fin_time_str):
         """
-        Ejecuta una acción de riego en un camellón específico.
+        Ejecuta una acción de riego en un camellón específico y acumula la información en el payload.
         """
         logging.debug("Se está ejecutando una acción en el scheduler")
 
@@ -213,30 +224,49 @@ class Scheduler:
 
         try:
             # Ejecutar la acción de riego completa usando gpio_manager y pasar fin_time
-            self.gpio_manager.accion_riego_completa(camellon, volumen, fertilizante1, fertilizante2, fin_time_str)
+            result = self.gpio_manager.accion_riego_completa(camellon, volumen, fertilizante1, fertilizante2, fin_time_str)
 
-            # Registrar el evento
-            self.last_event = {
-                'camellon': camellon,
-                'volumen': volumen,
-                'fertilizante1': fertilizante1,
-                'fertilizante2': fertilizante2,
-                'inicio': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                'fin': fin_time_str
-            }
+            # Obtener el tiempo y volumen reales
+            volumen_real = result.get('volumen_actual', 0)
+            tiempo_riego = result.get('tiempo_riego', 0)
+
+            # Acumular los valores en el payload correspondiente al surco
+            surco_index = camellon  # camellon se corresponde con el número de surco
+
+            # Acumular volumen en el surco correspondiente
+            self.payload_event[f'volumen{surco_index}'] += volumen_real
+            # Sumar tiempo total en el surco correspondiente
+            self.payload_event[f'tiempo{surco_index}'] += tiempo_riego
+            # Actualizar fertilizante con el último valor usado
+            self.payload_event[f'fertilizante1_{surco_index}'] = fertilizante1
+            self.payload_event[f'fertilizante2_{surco_index}'] = fertilizante2
 
             logging.debug(f"Acción ejecutada exitosamente en camellón {camellon}")
 
         except Exception as e:
             logging.error(f"Error al ejecutar la acción en camellón {camellon}: {e}")
 
-        except Exception as e:
-            logging.error(f"Error al ejecutar la acción en camellón {camellon}: {e}")
+    def get_payload_event(self):
+        """
+        Devuelve una copia del payload actual que contiene los volúmenes, tiempos y fertilizantes por surco.
+        
+        :return: Diccionario con el payload actual.
+        """
+        return self.payload_event.copy()
 
-    def get_last_event(self):
+    def delete_payload_event(self):
         """
-        Obtiene el último evento de riego ejecutado para reportarlo.
+        Restablece todos los valores del payload a sus valores iniciales.
         """
-        # Esta función debería obtener los datos del último riego para reportar
-        # Deberías mantener un registro de los eventos ejecutados integrados para ser reportados
-        pass
+        self.payload = {
+            # Campos de volumen para los 14 surcos
+            **{f'volumen{i}': 0 for i in range(1, 15)},
+            # Campos de tiempo para los 14 surcos
+            **{f'tiempo{i}': 0 for i in range(1, 15)},
+            # Campos de fertilizantes para los 14 surcos (último valor registrado)
+            **{f'fertilizante1_{i}': 0 for i in range(1, 15)},
+            **{f'fertilizante2_{i}': 0 for i in range(1, 15)},
+            # Campos de mensaje para los 14 surcos (inicialmente vacíos)
+            **{f'mensaje{i}': '' for i in range(1, 15)}
+        }
+        logging.debug("Payload de eventos eliminado y restablecido a valores iniciales.")

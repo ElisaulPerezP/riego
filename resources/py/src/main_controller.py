@@ -178,8 +178,9 @@ class MainController:
                         cronograma_generado = self.scheduler.generate_cronograma()
                     elif accion == "reportarRiego":
                         # Obtener el último evento de riego y reportarlo
-                        evento_riego = self.scheduler.get_last_event()
-                        #self.communication_manager.report_event(evento_riego)
+                        payload_evento_riego = self.scheduler.get_payload_event()
+                        self.communication_manager.report_event(payload_evento_riego)
+                        self.scheduler.delete_payload_event()
             time.sleep(60)  # Esperar un minuto antes de volver a comprobar
             
 if __name__ == '__main__':

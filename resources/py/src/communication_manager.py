@@ -53,19 +53,22 @@ class CommunicationManager:
             return False
 
         try:
-            # Construir la URL completa para reportar el evento
             url = f"{self.api_config['base_url']}{self.api_config['endpoints']['reportes_store']}"
-            headers = {'Content-Type': 'application/json'}
             payload = self.construct_event_payload(evento_riego)
-            response = requests.post(url, headers=headers, data=json.dumps(payload), timeout=10)
-            if response.status_code == 200:
-                print("Evento reportado exitosamente.")
+            logging.debug(f"el payload es:  {payload}")
+            # Enviar la solicitud con los datos en formato JSON
+            response = requests.post(url, json=payload)
+
+            if response.status_code == 201:
+                logging.debug(f"Evento reportado con éxito, payload: {payload}")
                 return True
             else:
-                print(f"Error al reportar el evento: Código {response.status_code}")
+                logging.error(f"Error al reportar el evento: código de respuesta {response}")
+                logging.error(f"Error en los headers de la redireccion son: {response.headers}")
+                logging.error(f"Error en el texto de la redireccion es: {response.text}")
                 return False
         except requests.exceptions.RequestException as e:
-            print(f"Excepción en la comunicación al reportar evento: {e}")
+            logging.error(f"Error al reportar el evento {e}")
             return False
 
 

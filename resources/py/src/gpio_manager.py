@@ -111,9 +111,12 @@ class GPIOManager:
         if fin_datetime <= now:
             fin_datetime += timedelta(days=1)
 
+        # Diccionario para almacenar los resultados
+        result = {}
+
         # Iniciar hilos
         valve_thread = threading.Thread(target=self.valve_control_thread, args=(camellon, stop_event))
-        flow_thread = threading.Thread(target=self.flow_counting_thread, args=(volumen, stop_event, fin_datetime))
+        flow_thread = threading.Thread(target=self.flow_counting_thread, args=(volumen, stop_event, fin_datetime, result))
         fertilizer_thread = threading.Thread(target=self.fertilizer_injection_thread, args=(fertilizante1, fertilizante2, stop_event))
 
         # Iniciar los hilos
@@ -133,6 +136,9 @@ class GPIOManager:
 
         logging.debug(f"Riego en camellón {camellon} finalizado.")
 
+        # Devolver los resultados
+        return result
+
     def valve_control_thread(self, camellon, stop_event):
         """
         Hilo que controla la válvula del camellón.
@@ -143,7 +149,7 @@ class GPIOManager:
         self.control_valve(camellon, 'OFF')
         logging.debug(f"Válvula del camellón {camellon} cerrada.")
 
-    def flow_counting_thread(self, volumen_objetivo, stop_event, fin_datetime):
+    def flow_counting_thread(self, volumen_objetivo, stop_event, fin_datetime, result):
         """
         Hilo que cuenta el flujo y establece el evento de parada cuando se alcanza el volumen o el tiempo.
         """
@@ -155,6 +161,9 @@ class GPIOManager:
             FACTOR_CONVERSION_FLUJO = 0.1
 
         logging.debug(f"Inicio de conteo de flujo. Volumen objetivo: {volumen_objetivo}.")
+
+        # Capturar el tiempo de inicio
+        start_time = datetime.now()
 
         while not stop_event.is_set():
             flujo = self.read_flow_counts()[0]  # Leer el flujo correspondiente
@@ -173,6 +182,14 @@ class GPIOManager:
                 break
 
             time.sleep(1)
+
+        # Capturar el tiempo de finalización
+        end_time = datetime.now()
+        tiempo_riego = (end_time - start_time).total_seconds()
+
+        # Almacenar los resultados en el diccionario compartido
+        result['volumen_actual'] = volumen_actual
+        result['tiempo_riego'] = tiempo_riego
 
         # Señalar a los otros hilos que deben detenerse
         stop_event.set()
