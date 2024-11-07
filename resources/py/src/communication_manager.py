@@ -44,29 +44,29 @@ class CommunicationManager:
             self.flagProgramaObtenido = False
             return False
 
-def report_event(self, evento_riego):
-    """
-    Reporta un evento de riego al servidor remoto.
-    """
-    if evento_riego is None:
-        print("Advertencia: No hay evento de riego para reportar.")
-        return False
-
-    try:
-        # Construir la URL completa para reportar el evento
-        url = f"{self.api_config['base_url']}{self.api_config['endpoints']['reportes_store']}"
-        headers = {'Content-Type': 'application/json'}
-        payload = self.construct_event_payload(evento_riego)
-        response = requests.post(url, headers=headers, data=json.dumps(payload), timeout=10)
-        if response.status_code == 200:
-            print("Evento reportado exitosamente.")
-            return True
-        else:
-            print(f"Error al reportar el evento: Código {response.status_code}")
+    def report_event(self, evento_riego):
+        """
+        Reporta un evento de riego al servidor remoto.
+        """
+        if evento_riego is None:
+            print("Advertencia: No hay evento de riego para reportar.")
             return False
-    except requests.exceptions.RequestException as e:
-        print(f"Excepción en la comunicación al reportar evento: {e}")
-        return False
+
+        try:
+            # Construir la URL completa para reportar el evento
+            url = f"{self.api_config['base_url']}{self.api_config['endpoints']['reportes_store']}"
+            headers = {'Content-Type': 'application/json'}
+            payload = self.construct_event_payload(evento_riego)
+            response = requests.post(url, headers=headers, data=json.dumps(payload), timeout=10)
+            if response.status_code == 200:
+                print("Evento reportado exitosamente.")
+                return True
+            else:
+                print(f"Error al reportar el evento: Código {response.status_code}")
+                return False
+        except requests.exceptions.RequestException as e:
+            print(f"Excepción en la comunicación al reportar evento: {e}")
+            return False
 
 
     def construct_event_payload(self, evento_riego):

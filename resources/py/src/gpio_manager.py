@@ -3,7 +3,10 @@
 import pigpio
 import threading
 import time
+from datetime import datetime, timedelta
 import logging
+import os
+from dotenv import load_dotenv
 
 # Configuración del sistema de logging
 logging.basicConfig(
@@ -96,54 +99,159 @@ class GPIOManager:
         Ejecuta la acción de riego completa en un camellón específico con control de volumen y fertilizante.
         """
         logging.debug(f"Iniciando riego en camellón {camellon}")
-        self.control_valve(camellon, 'ON')
-        volumen_actual = 0
-        FACTOR_CONVERSION_FLUJO = 0.1  # Ajusta según sea necesario
+        
+        # Crear un evento para señalizar cuándo detener los hilos
+        stop_event = threading.Event()
 
         # Convertir fin_time_str a un objeto datetime
-        from datetime import datetime, timedelta
-
-        # Convertir fin_time_str a un objeto datetime considerando el día actual
         fin_time = datetime.strptime(fin_time_str, '%H:%M').time()
         now = datetime.now()
         fin_datetime = datetime.combine(now.date(), fin_time)
-
         # Si fin_datetime es anterior o igual a now, significa que la hora de fin es al día siguiente
         if fin_datetime <= now:
             fin_datetime += timedelta(days=1)
 
-        # Controlar flujo y fertilizantes
-        while volumen_actual < volumen:
+        # Iniciar hilos
+        valve_thread = threading.Thread(target=self.valve_control_thread, args=(camellon, stop_event))
+        flow_thread = threading.Thread(target=self.flow_counting_thread, args=(volumen, stop_event, fin_datetime))
+        fertilizer_thread = threading.Thread(target=self.fertilizer_injection_thread, args=(fertilizante1, fertilizante2, stop_event))
+
+        # Iniciar los hilos
+        valve_thread.start()
+        flow_thread.start()
+        fertilizer_thread.start()
+
+        # Esperar a que el hilo de conteo de flujo termine (volumen alcanzado o tiempo finalizado)
+        flow_thread.join()
+
+        # Señalar a los otros hilos que deben detenerse
+        stop_event.set()
+
+        # Esperar a que los demás hilos terminen
+        valve_thread.join()
+        fertilizer_thread.join()
+
+        logging.debug(f"Riego en camellón {camellon} finalizado.")
+
+    def valve_control_thread(self, camellon, stop_event):
+        """
+        Hilo que controla la válvula del camellón.
+        """
+        self.control_valve(camellon, 'ON')
+        logging.debug(f"Válvula del camellón {camellon} abierta.")
+        stop_event.wait()  # Espera hasta que se establezca el evento de parada
+        self.control_valve(camellon, 'OFF')
+        logging.debug(f"Válvula del camellón {camellon} cerrada.")
+
+    def flow_counting_thread(self, volumen_objetivo, stop_event, fin_datetime):
+        """
+        Hilo que cuenta el flujo y establece el evento de parada cuando se alcanza el volumen o el tiempo.
+        """
+        volumen_actual = 0
+        try:
+            FACTOR_CONVERSION_FLUJO = float(os.environ.get('FACTOR_CONVERSION_FLUJO', '0.1'))
+        except ValueError:
+            logging.error("FACTOR_CONVERSION_FLUJO no es un número válido. Usando valor por defecto 0.1")
+            FACTOR_CONVERSION_FLUJO = 0.1
+
+        logging.debug(f"Inicio de conteo de flujo. Volumen objetivo: {volumen_objetivo}.")
+
+        while not stop_event.is_set():
             flujo = self.read_flow_counts()[0]  # Leer el flujo correspondiente
             volumen_actual += flujo * FACTOR_CONVERSION_FLUJO
-            time.sleep(1)
+            logging.debug(f"Volumen actual: {volumen_actual}.")
+
+            # Verificar si se alcanzó el volumen objetivo
+            if volumen_actual >= volumen_objetivo:
+                logging.debug(f"Volumen objetivo alcanzado: {volumen_actual}.")
+                break
 
             # Verificar si se alcanzó la hora de finalización
             now = datetime.now()
             if now >= fin_datetime:
-                logging.debug(f"Tiempo de riego alcanzado para camellón {camellon}. Volumen alcanzado: {volumen_actual}")
+                logging.debug(f"Tiempo de riego alcanzado. Hora actual: {now}.")
                 break
 
-        # Apagar la válvula del camellón
-        self.control_valve(camellon, 'OFF')
+            time.sleep(1)
 
-        logging.debug(f"Riego en camellón {camellon} completado. Volumen alcanzado: {volumen_actual}")
+        # Señalar a los otros hilos que deben detenerse
+        stop_event.set()
 
-        # Manejo de fertilizantes
-        # Asumiendo que los fertilizantes deben ser aplicados incluso si el tiempo de riego ha terminado
+    def fertilizer_injection_thread(self, fertilizante1, fertilizante2, stop_event):
+        """
+        Hilo que controla la inyección de fertilizantes durante el riego.
+        """
+        # Cargar parámetros PWM desde las variables de entorno o usar valores por defecto
+        try:
+            duty_cycle1 = float(os.environ.get('PWM_FERTILIZER1_DUTY_CYCLE', '0.5'))  # 50% por defecto
+            frequency1 = float(os.environ.get('PWM_FERTILIZER1_FREQUENCY', '0.1')) 
+        except ValueError:
+            logging.error("Valores de PWM de fertilizante 1 no válidos. Usando valores por defecto.")
+            duty_cycle1 = 0.5
+            frequency1 = 1.0
+
+        try:
+            duty_cycle2 = float(os.environ.get('PWM_FERTILIZER2_DUTY_CYCLE', '0.5'))
+            frequency2 = float(os.environ.get('PWM_FERTILIZER2_FREQUENCY', '0.1'))
+        except ValueError:
+            logging.error("Valores de PWM de fertilizante 2 no válidos. Usando valores por defecto.")
+            duty_cycle2 = 0.5
+            frequency2 = 1.0
+
+        # Cálculo de periodos
+        period1 = 1.0 / frequency1 if frequency1 > 0 else 1.0
+        on_time1 = duty_cycle1 * period1
+        off_time1 = period1 - on_time1
+
+        period2 = 1.0 / frequency2 if frequency2 > 0 else 1.0
+        on_time2 = duty_cycle2 * period2
+        off_time2 = period2 - on_time2
+
+        logging.debug(f"Iniciando inyección de fertilizantes con PWM.")
+
+        # Definir funciones internas para cada fertilizante
+        def pwm_fertilizer1():
+            if fertilizante1 > 0:
+                logging.debug("Iniciando PWM para fertilizante 1.")
+                while not stop_event.is_set():
+                    self.control_injector(1, 'ON')
+                    time.sleep(on_time1)
+                    self.control_injector(1, 'OFF')
+                    time.sleep(off_time1)
+                # Asegurar que el inyector esté apagado
+                self.control_injector(1, 'OFF')
+                logging.debug("Finalizando PWM para fertilizante 1.")
+
+        def pwm_fertilizer2():
+            if fertilizante2 > 0:
+                logging.debug("Iniciando PWM para fertilizante 2.")
+                while not stop_event.is_set():
+                    self.control_injector(2, 'ON')
+                    time.sleep(on_time2)
+                    self.control_injector(2, 'OFF')
+                    time.sleep(off_time2)
+                # Asegurar que el inyector esté apagado
+                self.control_injector(2, 'OFF')
+                logging.debug("Finalizando PWM para fertilizante 2.")
+
+        # Iniciar hilos para cada fertilizante
+        threads = []
         if fertilizante1 > 0:
-            logging.debug(f"Iniciando aplicación de fertilizante 1 en camellón {camellon}")
-            self.control_injector(1, 'ON')
-            time.sleep(fertilizante1)
-            self.control_injector(1, 'OFF')
-            logging.debug(f"Aplicación de fertilizante 1 completada en camellón {camellon}")
-
+            thread1 = threading.Thread(target=pwm_fertilizer1)
+            threads.append(thread1)
+            thread1.start()
         if fertilizante2 > 0:
-            logging.debug(f"Iniciando aplicación de fertilizante 2 en camellón {camellon}")
-            self.control_injector(2, 'ON')
-            time.sleep(fertilizante2)
-            self.control_injector(2, 'OFF')
-            logging.debug(f"Aplicación de fertilizante 2 completada en camellón {camellon}")
+            thread2 = threading.Thread(target=pwm_fertilizer2)
+            threads.append(thread2)
+            thread2.start()
+
+        # Esperar a que se establezca el evento de parada
+        stop_event.wait()
+
+        # Esperar a que los hilos PWM terminen
+        for t in threads:
+            t.join()
+
 
     def setup_flow_sensors(self):
         """

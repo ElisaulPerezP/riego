@@ -4,3 +4,4 @@ qrcode
 Pillow
 requests
 coverage
+python-dotenv
