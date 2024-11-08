@@ -30,7 +30,10 @@ def generar_graficas_reporte(json_data, output_path):
         # Convertir el tiempo H:i:s a minutos decimales
         for reporte in reportes:
             tiempo_str = reporte[tiempo_key]
-            horas, minutos, segundos = map(int, tiempo_str.split(':'))
+            horas, minutos, segundos = tiempo_str.split(':')
+            horas = int(horas)
+            minutos = int(minutos)
+            segundos = float(segundos)  # Cambiar a float para manejar los milisegundos
             total_minutos = horas * 60 + minutos + (segundos / 60)
             tiempos.append(total_minutos)
 

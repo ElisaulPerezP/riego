@@ -14,11 +14,12 @@ class ReporteController extends Controller
     {
         // Obtener los últimos reportes de riego
         $reportes = ReporteRiego::latest()->take(10)->get()->toJson();
-    
+
         // Definir la ruta de salida para las imágenes
         $output_path = storage_path('app/public/graphs');
         $image_file = $output_path . '/graficas_reporte_riego.png';
-    
+
+
         // Verificar si la imagen existe y eliminarla si es así
         if (file_exists($image_file)) {
             unlink($image_file);
@@ -26,8 +27,9 @@ class ReporteController extends Controller
         $python_script = base_path('resources/py/graficator.py');
         // Ejecutar el script de Python, capturando también los errores
         $command = "python3 {$python_script} '{$reportes}' '{$output_path}' 2>&1";
+        //dd($command);
         $output = shell_exec($command);
-    
+        //dd($output);
         // Ver el resultado de la ejecución para depurar si es necesario (descomenta para pruebas)
         // dd($output);
     

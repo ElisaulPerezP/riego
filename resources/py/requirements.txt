@@ -4,4 +4,5 @@ qrcode
 Pillow
 requests
 coverage
+matplotlib
 python-dotenv
