@@ -1,0 +1,18 @@
+○ riego.service - Script de Riego
+     Loaded: loaded (]8;;file://arandanos/etc/systemd/system/riego.service/etc/systemd/system/riego.service]8;;; [0;1;32menabled[0m; preset: [0;1;32menabled[0m)
+     Active: inactive (dead) since Tue 2024-11-12 10:38:17 -05; 7s ago
+   Duration: 43min 31.861s
+    Process: 634 ExecStart=/usr/bin/python3 /var/www/riego/resources/py/src/main_controller.py (code=killed, signal=TERM)
+   Main PID: 634 (code=killed, signal=TERM)
+        CPU: 16.128s
+
+nov 12 10:38:09 arandanos python3[634]: ¡Parada de emergencia activada!
+nov 12 10:38:09 arandanos python3[634]: ¡Parada de emergencia activada!
+nov 12 10:38:09 arandanos python3[634]: ¡Parada de emergencia activada!
+nov 12 10:38:09 arandanos python3[634]: ¡Parada de emergencia activada!
+nov 12 10:38:09 arandanos python3[634]: ¡Parada de emergencia activada!
+nov 12 10:38:09 arandanos python3[634]: ¡Parada de emergencia activada!
+nov 12 10:38:17 arandanos systemd[1]: Stopping riego.service - Script de Riego...
+nov 12 10:38:17 arandanos systemd[1]: riego.service: Deactivated successfully.
+nov 12 10:38:17 arandanos systemd[1]: Stopped riego.service - Script de Riego.
+nov 12 10:38:17 arandanos systemd[1]: riego.service: Consumed 16.128s CPU time.

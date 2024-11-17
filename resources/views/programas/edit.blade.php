@@ -32,7 +32,7 @@
                         <div class="flex mb-4">
                             <div class="flex items-center mr-4">
                                 <div class="bar-legend bar-volumen mr-2"></div>
-                                <span>Volumen (0-25)</span>
+                                <span>Volumen por dia(0-250)</span>
                             </div>
                             <div class="flex items-center mr-4">
                                 <div class="bar-legend bar-fertilizante1 mr-2"></div>
@@ -92,7 +92,7 @@
                                     <!-- Sliders para ajustar los valores -->
                                     <div class="mt-2">
                                         <label for="volumen{{ $i }}" class="block text-sm font-medium text-gray-700">Volumen</label>
-                                        <input type="range" name="volumen{{ $i }}" id="volumen{{ $i }}" min="0" max="25" step="0.1" value="{{ old("volumen{$i}", $programaRiego["volumen{$i}"]) }}" class="w-full slider" data-bar-id="bar-volumen-{{ $i }}" data-max="25">
+                                        <input type="range" name="volumen{{ $i }}" id="volumen{{ $i }}" min="0" max="250" step="10" value="{{ old("volumen{$i}", $programaRiego["volumen{$i}"]) }}" class="w-full slider" data-bar-id="bar-volumen-{{ $i }}" data-max="250">
 
                                         <label for="fertilizante1_{{ $i }}" class="block text-sm font-medium text-gray-700">Fertilizante 1</label>
                                         <input type="range" name="fertilizante1_{{ $i }}" id="fertilizante1_{{ $i }}" min="0" max="10" step="0.1" value="{{ old("fertilizante1_{$i}", $programaRiego["fertilizante1_{$i}"]) }}" class="w-full slider" data-bar-id="bar-fertilizante1-{{ $i }}" data-max="10">

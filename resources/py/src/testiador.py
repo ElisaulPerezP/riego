@@ -9,21 +9,22 @@ pins_info = {
     14: {'nombre': 'camellones14', 'logica': 'positiva'},
     13: {'nombre': 'camellones13', 'logica': 'positiva'},
     12: {'nombre': 'camellones12', 'logica': 'positiva'},
+    5: {'nombre': 'camellones5', 'logica': 'positiva'},
+    15: {'nombre': 'camellones15', 'logica': 'positiva'},
+    16: {'nombre': 'camellones16', 'logica': 'positiva'},
+    17: {'nombre': 'camellones17', 'logica': 'positiva'},
+
     # Camellones (Lógica Negativa)
     10: {'nombre': 'camellonesLogicaNegativa10', 'logica': 'negativa'},
     9: {'nombre': 'camellonesLogicaNegativa9', 'logica': 'negativa'},
     27: {'nombre': 'camellonesLogicaNegativa27', 'logica': 'negativa'},
     6: {'nombre': 'camellonesLogicaNegativa6', 'logica': 'negativa'},
-    5: {'nombre': 'camellonesLogicaNegativa5', 'logica': 'negativa'},
     # Fluxómetros (Lógica Positiva)
     20: {'nombre': 'Fluxometros20', 'logica': 'positiva'},
     21: {'nombre': 'Fluxometros21', 'logica': 'positiva'},
     # Inyectores (Lógica Negativa)
     2: {'nombre': 'inyectoresLogicaNegativa2', 'logica': 'negativa'},
     3: {'nombre': 'inyectoresLogicaNegativa3', 'logica': 'negativa'},
-    # Motobombas (Lógica Positiva)
-    15: {'nombre': 'motobombas15', 'logica': 'positiva'},
-    16: {'nombre': 'motobombas16', 'logica': 'positiva'},
     # Nivel (Lógica Positiva)
     22: {'nombre': 'nivel22', 'logica': 'positiva'},
     23: {'nombre': 'nivel23', 'logica': 'positiva'},

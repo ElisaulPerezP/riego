@@ -43,7 +43,7 @@
     {"inicio": "21:00", "finalizacion": "21:02", "accion": "reportarRiego"},
     {"inicio": "21:10", "finalizacion": "21:12", "accion": "consultarPrograma"},
     {"inicio": "22:00", "finalizacion": "22:02", "accion": "reportarRiego"},
-    {"inicio": "22:10", "finalizacion": "22:12", "accion": "consultarPrograma"},
+    {"inicio": "22:47", "finalizacion": "22:49", "accion": "consultarPrograma"},
     {"inicio": "23:00", "finalizacion": "23:02", "accion": "reportarRiego"},
     {"inicio": "23:10", "finalizacion": "23:12", "accion": "consultarPrograma"},
     {"inicio": "23:50", "finalizacion": "23:52", "accion": "reportarRiego"}

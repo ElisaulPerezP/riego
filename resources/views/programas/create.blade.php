@@ -31,15 +31,15 @@
                         <div class="flex mb-4">
                             <div class="flex items-center mr-4">
                                 <div class="bar-legend bar-volumen mr-2"></div>
-                                <span>Volumen (0-25)</span>
+                                <span>Volumen en un dia(0-25)</span>
                             </div>
                             <div class="flex items-center mr-4">
                                 <div class="bar-legend bar-fertilizante1 mr-2"></div>
-                                <span>Fertilizante 1 (0-10)</span>
+                                <span>Concentracion de Fertilizante 1 (0-10)</span>
                             </div>
                             <div class="flex items-center">
                                 <div class="bar-legend bar-fertilizante2 mr-2"></div>
-                                <span>Fertilizante 2 (0-10)</span>
+                                <span>Concentracion de Fertilizante 2 (0-10)</span>
                             </div>
                         </div>
 
@@ -92,7 +92,7 @@
                                     <div class="mt-2">
                                         <!-- Volumen -->
                                         <label for="volumen{{ $i }}" class="block text-sm font-medium text-gray-700">Volumen</label>
-                                        <input type="range" name="volumen{{ $i }}" id="volumen{{ $i }}" min="0" max="25" step="0.1" value="{{ old("volumen{$i}", 0) }}" class="w-full slider" data-bar-id="bar-volumen-{{ $i }}" data-max="25">
+                                        <input type="range" name="volumen{{ $i }}" id="volumen{{ $i }}" min="0" max="250" step="10" value="{{ old("volumen{$i}", 0) }}" class="w-full slider" data-bar-id="bar-volumen-{{ $i }}" data-max="250">
 
                                         <!-- Fertilizante 1 -->
                                         <label for="fertilizante1_{{ $i }}" class="block text-sm font-medium text-gray-700">Fertilizante 1</label>

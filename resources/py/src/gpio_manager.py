@@ -100,6 +100,10 @@ class GPIOManager:
         """
         logging.debug(f"Iniciando riego en camellón {camellon}")
         
+           # Validar el camellón antes de iniciar los hilos
+        if not self.is_valid_camellon(camellon):
+            logging.error(f"Camellón {camellon} no encontrado en la configuración.")
+            return  # O puedes lanzar una excepción si lo prefieres
         # Crear un evento para señalizar cuándo detener los hilos
         stop_event = threading.Event()
 
@@ -139,6 +143,18 @@ class GPIOManager:
         # Devolver los resultados
         return result
 
+
+    def is_valid_camellon(self, camellon_number):
+        """
+        Verifica si el camellon_number es válido según la configuración.
+        """
+        if 'camellones_indices' in self.gpio_config and camellon_number in self.gpio_config['camellones_indices']:
+            return True
+        elif 'camellonesLogicaNegativa_indices' in self.gpio_config and camellon_number in self.gpio_config['camellonesLogicaNegativa_indices']:
+            return True
+        else:
+            return False 
+            
     def valve_control_thread(self, camellon, stop_event):
         """
         Hilo que controla la válvula del camellón.
@@ -155,10 +171,10 @@ class GPIOManager:
         """
         volumen_actual = 0
         try:
-            FACTOR_CONVERSION_FLUJO = float(os.environ.get('FACTOR_CONVERSION_FLUJO', '0.1'))
+            FACTOR_CONVERSION_FLUJO = float(os.environ.get('FACTOR_CONVERSION_FLUJO', '0.04'))
         except ValueError:
-            logging.error("FACTOR_CONVERSION_FLUJO no es un número válido. Usando valor por defecto 0.1")
-            FACTOR_CONVERSION_FLUJO = 0.1
+            logging.error("FACTOR_CONVERSION_FLUJO no es un número válido. Usando valor por defecto 0.04")
+            FACTOR_CONVERSION_FLUJO = 0.04
 
         logging.debug(f"Inicio de conteo de flujo. Volumen objetivo: {volumen_objetivo}.")
 
@@ -166,7 +182,8 @@ class GPIOManager:
         start_time = datetime.now()
 
         while not stop_event.is_set():
-            flujo = self.read_flow_counts()[0]  # Leer el flujo correspondiente
+            flujos = self.read_flow_counts()
+            flujo = flujos[0] + flujos[1]  # Leer el flujo correspondiente
             volumen_actual += flujo * FACTOR_CONVERSION_FLUJO
             logging.debug(f"Volumen actual: {volumen_actual}.")
 
@@ -359,17 +376,22 @@ class GPIOManager:
             return
 
         if action == 'ON':
+            self.control_tank_valve("ON")
             if logic == 'positive':
                 self.pi.write(pin, 1)
             else:
                 self.pi.write(pin, 0)
         elif action == 'OFF':
+            self.control_tank_valve("OFF")
             if logic == 'positive':
                 self.pi.write(pin, 0)
             else:
                 self.pi.write(pin, 1)
         else:
+            self.control_tank_valve("OFF")
             logging.error(f"Acción inválida para control de válvula: {action}")
+            raise ValueError(f"Camellón {camellon_number} no encontrado en la configuración.")
+
 
 
     def control_pump(self, pump_number, action):

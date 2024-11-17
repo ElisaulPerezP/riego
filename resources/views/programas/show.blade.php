@@ -29,7 +29,7 @@
                     <div class="flex mb-4">
                         <div class="flex items-center mr-4">
                             <div class="bar-legend bar-volumen mr-2"></div>
-                            <span>Volumen (0-25)</span>
+                            <span>Volumen (0-250)</span>
                         </div>
                         <div class="flex items-center mr-4">
                             <div class="bar-legend bar-fertilizante1 mr-2"></div>
@@ -79,7 +79,7 @@
                         @for ($i = 1; $i <= 14; $i++)
                             <div>
                                 <div class="bar-container">
-                                    <div class="bar bar-volumen" style="height: {{ ($programaRiego["volumen{$i}"] / 25) * 100 }}%;"></div>
+                                    <div class="bar bar-volumen" style="height: {{ ($programaRiego["volumen{$i}"] / 250) * 100 }}%;"></div>
                                     <div class="bar bar-fertilizante1" style="height: {{ ($programaRiego["fertilizante1_{$i}"] / 10) * 100 }}%;"></div>
                                     <div class="bar bar-fertilizante2" style="height: {{ ($programaRiego["fertilizante2_{$i}"] / 10) * 100 }}%;"></div>
                                 </div>

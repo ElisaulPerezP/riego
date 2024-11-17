@@ -34,7 +34,7 @@
                     <div class="flex mb-4">
                         <div class="flex items-center mr-4">
                             <div class="bar-legend bar-volumen mr-2"></div>
-                            <span>Volumen (0-25)</span>
+                            <span>Volumen (0-250)</span>
                         </div>
                         <div class="flex items-center mr-4">
                             <div class="bar-legend bar-fertilizante1 mr-2"></div>
@@ -103,7 +103,7 @@
                                     @for ($i = 1; $i <= 14; $i++)
                                         <td class="px-2 py-2 border">
                                             <div class="bar-container">
-                                                <div class="bar bar-volumen" style="height: {{ ($programa["volumen{$i}"] / 25) * 100 }}%;"></div>
+                                                <div class="bar bar-volumen" style="height: {{ ($programa["volumen{$i}"] / 250) * 100 }}%;"></div>
                                                 <div class="bar bar-fertilizante1" style="height: {{ ($programa["fertilizante1_{$i}"] / 10) * 100 }}%;"></div>
                                                 <div class="bar bar-fertilizante2" style="height: {{ ($programa["fertilizante2_{$i}"] / 10) * 100 }}%;"></div>
                                             </div>

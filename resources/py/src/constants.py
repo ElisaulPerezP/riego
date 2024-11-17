@@ -16,6 +16,7 @@ GPIO_CONFIG_FILES = {
     'parada': 'parada.txt',
     'nivel': 'nivel.txt',
     'inyectoresLogicaNegativa': 'inyectoresLogicaNegativa.txt',
+    'inyectores': 'inyectores.txt',
     'camellonesLogicaNegativa': 'camellonesLogicaNegativa.txt',
     'camellones': 'camellones.txt',
     'valvulaTanquesLogicaNegativa': 'valvulaTanquesLogicaNegativa.txt',
