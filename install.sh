@@ -3,6 +3,7 @@
 # Este script configura el entorno, clona el repositorio (si es necesario),
 # instala PHP 8.2, Composer, Apache y sus dependencias, y configura Apache para servir la aplicación.
 # Además, configura globalmente Git (solicitando nombre y correo) y verifica/genera una clave SSH para conectar con GitHub.
+# Se asegura de que la clave SSH (privada y pública) sea propiedad del usuario original.
 
 # Verificar si el script se está ejecutando como root o con sudo
 if [ "$EUID" -ne 0 ]; then
@@ -52,6 +53,12 @@ if [ ! -f "$SSH_KEY" ]; then
         fi
         read -p "Ingrese su email para la clave SSH: " user_email
         ssh-keygen -t ed25519 -C "$user_email" -f "$SSH_KEY" -N ""
+        # Asegurarse de que la clave sea propiedad del usuario original
+        if [ -n "$SUDO_USER" ]; then
+            chown "$SUDO_USER:$SUDO_USER" "$SSH_KEY" "$SSH_KEY.pub"
+        else
+            chown "$USER:$USER" "$SSH_KEY" "$SSH_KEY.pub"
+        fi
         # Iniciar el agente SSH y añadir la clave
         eval "$(ssh-agent -s)"
         ssh-add "$SSH_KEY"
@@ -65,6 +72,12 @@ if [ ! -f "$SSH_KEY" ]; then
     fi
 else
     echo "✅ Clave SSH encontrada."
+    # Corregir la propiedad de la clave existente
+    if [ -n "$SUDO_USER" ]; then
+        chown "$SUDO_USER:$SUDO_USER" "$SSH_KEY" "$SSH_KEY.pub"
+    else
+        chown "$USER:$USER" "$SSH_KEY" "$SSH_KEY.pub"
+    fi
     eval "$(ssh-agent -s)"
     ssh-add "$SSH_KEY"
 fi
@@ -147,7 +160,6 @@ echo "✅ Sitio 'riego' habilitado y Apache recargado."
 
 # 9️⃣ CONFIGURAR GIT PARA CONSIDERAR EL DIRECTORIO COMO SEGURO
 echo "🔧 Configurando Git para considerar el directorio seguro..."
-# Se ejecuta como el usuario 'arandanos' para que la configuración global se almacene en su home.
 sudo -u arandanos git config --global --add safe.directory "$PROJECT_DIR"
 
 echo "============================================"
