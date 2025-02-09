@@ -193,6 +193,46 @@ sed -i "s/^DB_DATABASE=.*/DB_DATABASE=laravel/" "$PROJECT_DIR/.env"
 sed -i "s/^DB_USERNAME=.*/DB_USERNAME=root/" "$PROJECT_DIR/.env"
 sed -i "s/^DB_PASSWORD=.*/DB_PASSWORD=${MYSQL_PASSWORD}/" "$PROJECT_DIR/.env"
 
+
+# 1️⃣3️⃣ CONFIGURAR AMBIENTE NODE Y COMPILAR ASSETS DEL FRONTEND
+echo "📦 Configurando entorno Node y compilando assets del frontend..."
+
+# Instalar nvm (si no está instalado)
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash
+
+# Cargar nvm en la sesión actual (esto suele añadirse al .bashrc o .zshrc, pero aquí lo cargamos manualmente)
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # Carga nvm
+
+# Instalar Node.js versión 18 y establecerla como versión por defecto
+nvm install 18
+nvm use 18
+nvm alias default 18
+
+# Verificar que Node.js y npm están en versión 18
+node -v
+npm -v
+
+# Cambiar la propiedad del directorio para que npm tenga permisos de escritura
+sudo chown -R arandanos:arandanos "$PROJECT_DIR"
+
+# Navegar al directorio del proyecto
+cd "$PROJECT_DIR"
+
+# Instalar las dependencias de Node (si aún no se han instalado)
+npm install
+
+# Ejecutar "npm audit fix" para corregir vulnerabilidades, si las hubiera
+npm audit fix
+
+# Compilar los assets del frontend
+npm run build
+
+# Restaurar la propiedad del proyecto para Apache (usuario www-data)
+sudo chown -R www-data:www-data "$PROJECT_DIR"
+
+echo "✅ Entorno Node configurado y assets compilados."
+
 # 1️⃣3️⃣ CONFIGURAR LA APLICACIÓN
 echo "📂 Configurando la aplicación..."
 cd /home/arandanos/riego
