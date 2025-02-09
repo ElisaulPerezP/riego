@@ -172,6 +172,33 @@ echo "✅ Sitio 'riego' habilitado y Apache recargado."
 echo "🔧 Configurando Git para considerar el directorio seguro..."
 sudo -u arandanos git config --global --add safe.directory "$PROJECT_DIR"
 
+# 1️⃣2️⃣ CONFIGURAR BASE DE DATOS (MySQL)
+echo "📥 Instalando y configurando MySQL..."
+apt install -y mysql-server
+
+echo "🔧 Creando la base de datos 'laravel'..."
+mysql -e "CREATE DATABASE IF NOT EXISTS laravel;"
+
+MYSQL_PASSWORD=$(openssl rand -hex 12)
+echo "🔑 Contraseña generada para MySQL root: $MYSQL_PASSWORD"
+
+if [ ! -f "$PROJECT_DIR/.env" ]; then
+    cp "$PROJECT_DIR/.env.example" "$PROJECT_DIR/.env"
+fi
+
+sed -i "s/^DB_CONNECTION=.*/DB_CONNECTION=mysql/" "$PROJECT_DIR/.env"
+sed -i "s/^DB_HOST=.*/DB_HOST=127.0.0.1/" "$PROJECT_DIR/.env"
+sed -i "s/^DB_PORT=.*/DB_PORT=3306/" "$PROJECT_DIR/.env"
+sed -i "s/^DB_DATABASE=.*/DB_DATABASE=laravel/" "$PROJECT_DIR/.env"
+sed -i "s/^DB_USERNAME=.*/DB_USERNAME=root/" "$PROJECT_DIR/.env"
+sed -i "s/^DB_PASSWORD=.*/DB_PASSWORD=${MYSQL_PASSWORD}/" "$PROJECT_DIR/.env"
+
+# 1️⃣3️⃣ CONFIGURAR LA APLICACIÓN
+echo "📂 Configurando la aplicación..."
+cd /home/arandanos/riego
+php artisan key:generate
+
+
 echo "============================================"
 echo "🎉 Instalación completada con éxito."
 echo "Accede a http://arandanos.local en tu navegador (asegúrate de tener la entrada en tu archivo hosts si es necesario)."
