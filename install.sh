@@ -231,6 +231,7 @@ php artisan view:cache
 # 1️⃣7️⃣ Restaurar la propiedad del proyecto para Apache (usuario www-data)
 echo "🔧 Restaurando propiedad del proyecto a www-data..."
 sudo chown -R www-data:www-data "$PROJECT_DIR"
+sudo chmod 755 /home/arandanos
 echo "✅ Propiedad restaurada a www-data."
 
 # ───────────────────────────────────────────────────────────────
