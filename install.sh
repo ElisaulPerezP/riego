@@ -5,7 +5,7 @@
 # Además, configura globalmente Git (solicitando nombre y correo) y verifica/genera una clave SSH para conectar con GitHub.
 # Se asegura de que la clave SSH (privada y pública) sea propiedad del usuario original.
 
-# Verificar si el script se está ejecutando como root o con sudo
+# 1️⃣ Verificar si el script se está ejecutando como root o con sudo
 if [ "$EUID" -ne 0 ]; then
     echo "❌ ERROR: Este script debe ejecutarse con permisos de superusuario."
     echo "👉 Usa: sudo bash install.sh"
@@ -24,7 +24,7 @@ echo "============================================"
 echo "🔄 Actualizando lista de paquetes..."
 apt update -y
 
-# 2️⃣ INSTALACIÓN DE GIT (si no está instalado)
+# 2️⃣ INSTALACIÓN DE GIT Y CONFIGURACIÓN GLOBAL
 if ! command -v git &> /dev/null; then
     echo "📥 Instalando Git..."
     apt install -y git
@@ -39,7 +39,7 @@ git config --global user.name "$git_username"
 git config --global user.email "$git_email"
 echo "✅ Configuración global de Git establecida: $git_username <$git_email>"
 
-# 2.5 CONFIGURACIÓN DE CLAVE SSH
+# 3️⃣ CONFIGURACIÓN DE CLAVE SSH PARA GITHUB
 echo "🔐 Verificando clave SSH para GitHub..."
 SSH_KEY="$USER_HOME/.ssh/id_ed25519"
 if [ ! -f "$SSH_KEY" ]; then
@@ -72,7 +72,6 @@ if [ ! -f "$SSH_KEY" ]; then
     fi
 else
     echo "✅ Clave SSH encontrada."
-    # Corregir la propiedad de la clave existente
     if [ -n "$SUDO_USER" ]; then
         chown "$SUDO_USER:$SUDO_USER" "$SSH_KEY" "$SSH_KEY.pub"
     else
@@ -82,7 +81,7 @@ else
     ssh-add "$SSH_KEY"
 fi
 
-# 3️⃣ VERIFICAR SI EL SCRIPT ESTÁ DENTRO DEL REPOSITORIO
+# 4️⃣ VERIFICAR SI EL SCRIPT ESTÁ DENTRO DEL REPOSITORIO Y CLONARLO SI ES NECESARIO
 SCRIPT_DIR=$(dirname "$(realpath "$0")")
 if [[ "$SCRIPT_DIR" == "$PROJECT_DIR" ]]; then
     echo "✅ El script se está ejecutando dentro del repositorio clonado. Omitiendo descarga."
@@ -95,19 +94,30 @@ else
     fi
 fi
 
-# 4️⃣ INSTALAR PHP 8.2 Y EXTENSIONES
+# 5️⃣ CONFIGURAR PERMISOS PARA APACHE
+echo "🔧 Configurando permisos para Apache..."
+# Permite que Apache acceda al directorio home
+chmod +x "$USER_HOME"
+# Ajustar permisos del proyecto para que sean accesibles por Apache (usuario www-data)
+chown -R www-data:www-data "$PROJECT_DIR"
+chmod -R 755 "$PROJECT_DIR"
+# Si se trata de un proyecto Laravel, asegurar que storage y bootstrap/cache sean escribibles
+if [ -d "$PROJECT_DIR/storage" ] && [ -d "$PROJECT_DIR/bootstrap/cache" ]; then
+    chmod -R 775 "$PROJECT_DIR/storage" "$PROJECT_DIR/bootstrap/cache"
+fi
+echo "✅ Permisos configurados correctamente."
+
+# 6️⃣ INSTALAR PHP 8.2 Y EXTENSIONES
 echo "📥 Instalando PHP 8.2 y extensiones necesarias..."
 add-apt-repository -y ppa:ondrej/php
 apt update -y
 apt install -y php8.2 php8.2-cli php8.2-common php8.2-mbstring php8.2-xml php8.2-bcmath php8.2-curl php8.2-zip php8.2-gd php8.2-intl php8.2-mysql php8.2-dom
-
-# Verificar la versión de PHP
 echo "🔍 Verificando versión de PHP..."
 update-alternatives --set php /usr/bin/php8.2
 update-alternatives --set phar /usr/bin/phar8.2
 php -v
 
-# 5️⃣ INSTALACIÓN DE COMPOSER
+# 7️⃣ INSTALAR Y VERIFICAR COMPOSER
 if ! command -v composer &> /dev/null; then
     echo "📥 Instalando Composer..."
     apt install -y curl php-cli unzip
@@ -116,12 +126,10 @@ if ! command -v composer &> /dev/null; then
 else
     echo "✅ Composer ya está instalado. Omitiendo..."
 fi
-
-# 6️⃣ VERIFICACIÓN DE COMPOSER
 echo "🔍 Verificando instalación de Composer..."
 composer --version
 
-# 7️⃣ INSTALACIÓN Y CONFIGURACIÓN DE APACHE
+# 8️⃣ INSTALAR Y CONFIGURAR APACHE
 if ! systemctl is-active --quiet apache2; then
     echo "📥 Instalando Apache..."
     apt install -y apache2
@@ -129,22 +137,24 @@ if ! systemctl is-active --quiet apache2; then
 else
     echo "✅ Apache ya está instalado. Omitiendo..."
 fi
-
-# Habilitar mod_rewrite para Laravel
 echo "🔧 Habilitando mod_rewrite en Apache..."
 a2enmod rewrite
 systemctl enable apache2
 systemctl restart apache2
 echo "✅ Apache configurado correctamente."
 
-# 8️⃣ INSTALAR DEPENDENCIAS CON COMPOSER
+# 9️⃣ INSTALAR DEPENDENCIAS CON COMPOSER
 echo "📦 Instalando dependencias del proyecto con Composer..."
 cd "$PROJECT_DIR"
 composer install || composer update
 
+# 🔟 CONFIGURAR APACHE PARA SERVIR LA APLICACIÓN
 echo "📂 Configurando Apache para servir la aplicación..."
 
-# Verificar que el archivo de configuración exista en el repositorio
+# Deshabilitar el sitio por defecto de Apache
+sudo a2dissite 000-default.conf
+sudo systemctl reload apache2
+
 if [ -f "$PROJECT_DIR/config/apache/riego.conf" ]; then
     cp "$PROJECT_DIR/config/apache/riego.conf" /etc/apache2/sites-available/riego.conf
     echo "✅ Archivo de configuración copiado a /etc/apache2/sites-available."
@@ -158,10 +168,11 @@ a2ensite riego.conf
 systemctl reload apache2
 echo "✅ Sitio 'riego' habilitado y Apache recargado."
 
-# 9️⃣ CONFIGURAR GIT PARA CONSIDERAR EL DIRECTORIO COMO SEGURO
+# 1️⃣1️⃣ CONFIGURAR GIT PARA CONSIDERAR EL DIRECTORIO COMO SEGURO
 echo "🔧 Configurando Git para considerar el directorio seguro..."
 sudo -u arandanos git config --global --add safe.directory "$PROJECT_DIR"
 
 echo "============================================"
 echo "🎉 Instalación completada con éxito."
 echo "Accede a http://arandanos.local en tu navegador (asegúrate de tener la entrada en tu archivo hosts si es necesario)."
+
