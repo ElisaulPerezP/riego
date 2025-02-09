@@ -1,9 +1,15 @@
 #!/bin/bash
-# install.sh - Instalador del proyecto Riego
+# install.sh - Instalador del proyecto Riego para Producción
 # Este script configura el entorno, clona el repositorio (si es necesario),
-# instala PHP 8.2, Composer, Apache y sus dependencias, y configura Apache para servir la aplicación.
-# Además, configura Git globalmente, verifica/genera una clave SSH para conectar con GitHub,
-# instala MySQL y configura la base de datos, y prepara el entorno Node para compilar los assets del frontend.
+# instala PHP 8.2, Composer, Apache, MySQL y Node.js, configura Git, genera la clave SSH,
+# configura la base de datos, compila los assets del frontend y prepara la aplicación para producción.
+#
+# Procedimiento de despliegue en producción:
+#   • composer install --optimize-autoloader --no-dev
+#   • php artisan config:cache
+#   • php artisan event:cache
+#   • php artisan route:cache
+#   • php artisan view:cache
 #
 # El instalador se ejecuta como sudo (por el usuario "arandanos") y, al finalizar,
 # se entrega la propiedad del directorio del proyecto a "www-data" para que Apache lo gestione.
@@ -22,7 +28,7 @@ USER_HOME="/home/arandanos"
 PROJECT_DIR="$USER_HOME/riego"
 REPO_URL="git@github.com:ElisaulPerezP/riego.git"
 
-echo "🚀 Iniciando instalación del proyecto Riego..."
+echo "🚀 Iniciando instalación del proyecto Riego en producción..."
 echo "============================================"
 
 # ───────────────────────────────────────────────────────────────
@@ -31,7 +37,7 @@ echo "🔄 Actualizando lista de paquetes..."
 apt update -y
 
 # ───────────────────────────────────────────────────────────────
-# 4️⃣ Instalación de Git y configuración global (almacenada en el home del usuario real)
+# 4️⃣ Instalación de Git y configuración global
 if ! command -v git &> /dev/null; then
     echo "📥 Instalando Git..."
     apt install -y git
@@ -39,7 +45,6 @@ else
     echo "✅ Git ya está instalado. Omitiendo..."
 fi
 
-# Configuración global de Git (se configura para el usuario "arandanos")
 read -p "Ingrese su nombre de usuario global para Git: " git_username
 read -p "Ingrese su correo electrónico global para Git: " git_email
 sudo -u arandanos git config --global user.name "$git_username"
@@ -54,23 +59,20 @@ if [ ! -f "$SSH_KEY" ]; then
     echo "No se encontró clave SSH."
     read -p "¿Desea generar una nueva clave SSH (ed25519) para GitHub? (s/n): " generate_key
     if [[ "$generate_key" =~ ^[Ss] ]]; then
-        # Crear el directorio .ssh si no existe
         if [ ! -d "$USER_HOME/.ssh" ]; then
             mkdir "$USER_HOME/.ssh"
             chmod 700 "$USER_HOME/.ssh"
         fi
         read -p "Ingrese su email para la clave SSH: " user_email
         ssh-keygen -t ed25519 -C "$user_email" -f "$SSH_KEY" -N ""
-        # Asegurar que la clave sea propiedad del usuario real
         chown arandanos:arandanos "$SSH_KEY" "$SSH_KEY.pub"
-        # Iniciar el agente SSH y añadir la clave
         eval "$(ssh-agent -s)"
         ssh-add "$SSH_KEY"
         echo "✅ Clave SSH generada y agregada al agente."
         echo "Su clave pública es:"
         cat "$SSH_KEY.pub"
         echo "Por favor, agréguela a su cuenta de GitHub antes de continuar."
-        read -p "Presione Enter para continuar una vez haya agregado la clave..."
+        read -p "Presione Enter para continuar..."
     else
         echo "❌ No se generó una clave SSH. La clonación del repositorio podría fallar."
     fi
@@ -82,10 +84,10 @@ else
 fi
 
 # ───────────────────────────────────────────────────────────────
-# 6️⃣ Verificar si el script se ejecuta dentro del repositorio; si no, clonarlo
+# 6️⃣ Clonar el repositorio (si no existe)
 SCRIPT_DIR=$(dirname "$(realpath "$0")")
 if [[ "$SCRIPT_DIR" == "$PROJECT_DIR" ]]; then
-    echo "✅ El script se está ejecutando dentro del repositorio clonado. Omitiendo descarga."
+    echo "✅ El script se ejecuta dentro del repositorio clonado. Omitiendo clonación."
 else
     if [ -d "$PROJECT_DIR" ]; then
         echo "⚠️ El directorio $PROJECT_DIR ya existe. Omitiendo clonación."
@@ -96,8 +98,7 @@ else
 fi
 
 # ───────────────────────────────────────────────────────────────
-# 7️⃣ Configurar permisos TEMPORALES para la instalación
-# Se necesita que el usuario "arandanos" (quien ejecuta los comandos de instalación) tenga propiedad
+# 7️⃣ Configurar permisos temporales para la instalación (propiedad: arandanos)
 echo "🔧 Configurando permisos temporales para la instalación..."
 sudo chown -R arandanos:arandanos "$PROJECT_DIR"
 chmod -R 755 "$PROJECT_DIR"
@@ -146,15 +147,14 @@ systemctl restart apache2
 echo "✅ Apache configurado correctamente."
 
 # ───────────────────────────────────────────────────────────────
-# 1️⃣1️⃣ Instalar dependencias del proyecto con Composer
-echo "📦 Instalando dependencias del proyecto con Composer..."
+# 1️⃣1️⃣ Instalar dependencias del proyecto con Composer (producción)
+echo "📦 Instalando dependencias del proyecto (producción) con Composer..."
 cd "$PROJECT_DIR"
-composer install || composer update
+composer install --optimize-autoloader --no-dev || composer update --optimize-autoloader --no-dev
 
 # ───────────────────────────────────────────────────────────────
 # 1️⃣2️⃣ Configurar Apache para servir la aplicación
 echo "📂 Configurando Apache para servir la aplicación..."
-# Deshabilitar el sitio por defecto
 a2dissite 000-default.conf
 systemctl reload apache2
 
@@ -166,7 +166,6 @@ else
     exit 1
 fi
 
-# Habilitar el sitio y recargar Apache
 a2ensite riego.conf
 systemctl reload apache2
 echo "✅ Sitio 'riego' habilitado y Apache recargado."
@@ -177,7 +176,7 @@ echo "🔧 Configurando Git para considerar el directorio seguro..."
 sudo -u arandanos git config --global --add safe.directory "$PROJECT_DIR"
 
 # ───────────────────────────────────────────────────────────────
-# 1️⃣4️⃣ Configurar la base de datos (MySQL)
+# 1️⃣4️⃣ Configurar la base de datos (MySQL) y actualizar .env
 echo "📥 Instalando y configurando MySQL..."
 apt install -y mysql-server
 
@@ -187,12 +186,10 @@ mysql -e "CREATE DATABASE IF NOT EXISTS laravel;"
 MYSQL_PASSWORD=$(openssl rand -hex 12)
 echo "🔑 Contraseña generada para MySQL root: $MYSQL_PASSWORD"
 
-# Si no existe el archivo .env, se copia de .env.example
 if [ ! -f "$PROJECT_DIR/.env" ]; then
     cp "$PROJECT_DIR/.env.example" "$PROJECT_DIR/.env"
 fi
 
-# Actualizar parámetros en el .env
 sed -i "s/^DB_CONNECTION=.*/DB_CONNECTION=mysql/" "$PROJECT_DIR/.env"
 sed -i "s/^DB_HOST=.*/DB_HOST=127.0.0.1/" "$PROJECT_DIR/.env"
 sed -i "s/^DB_PORT=.*/DB_PORT=3306/" "$PROJECT_DIR/.env"
@@ -203,41 +200,32 @@ sed -i "s/^DB_PASSWORD=.*/DB_PASSWORD=${MYSQL_PASSWORD}/" "$PROJECT_DIR/.env"
 # ───────────────────────────────────────────────────────────────
 # 1️⃣5️⃣ Configurar entorno Node y compilar assets del frontend
 echo "📦 Configurando entorno Node y compilando assets del frontend..."
-
-# Instalar nvm (si no está instalado)
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash
-
-# Cargar nvm en la sesión actual (se suele añadir al .bashrc o .zshrc)
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-
-# Instalar Node.js versión 18 y establecerla como predeterminada
 nvm install 18
 nvm use 18
 nvm alias default 18
-
-# Verificar versiones de Node.js y npm
 node -v
 npm -v
 
-# Para que npm pueda escribir, aseguramos la propiedad temporalmente al usuario "arandanos"
+# Aseguramos la propiedad para que npm pueda escribir
 sudo chown -R arandanos:arandanos "$PROJECT_DIR"
-
-# Navegar al directorio del proyecto y ejecutar dependencias y build
 cd "$PROJECT_DIR"
 npm install
 npm audit fix
 npm run build
-
 echo "✅ Entorno Node configurado y assets compilados."
 
 # ───────────────────────────────────────────────────────────────
-# 1️⃣6️⃣ Configurar la aplicación (generar APP_KEY, migrar, sembrar, etc.)
-echo "📂 Configurando la aplicación..."
+# 1️⃣6️⃣ Configurar la aplicación para producción
+echo "📂 Configurando la aplicación para producción..."
 cd "$PROJECT_DIR"
 php artisan key:generate
-# Aquí podrías agregar comandos adicionales, por ejemplo:
-# php artisan migrate --seed
+php artisan config:cache
+php artisan event:cache
+php artisan route:cache
+php artisan view:cache
 
 # ───────────────────────────────────────────────────────────────
 # 1️⃣7️⃣ Restaurar la propiedad del proyecto para Apache (usuario www-data)
@@ -250,3 +238,4 @@ echo "✅ Propiedad restaurada a www-data."
 echo "============================================"
 echo "🎉 Instalación completada con éxito."
 echo "Accede a http://arandanos.local en tu navegador (asegúrate de tener la entrada en tu archivo hosts si es necesario)."
+
