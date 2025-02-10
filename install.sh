@@ -35,6 +35,9 @@ echo "============================================"
 # 3️⃣ Actualización de paquetes
 echo "🔄 Actualizando lista de paquetes..."
 apt update -y
+sudo apt install avahi-daemon -y
+sudo systemctl enable avahi-daemon
+sudo systemctl start avahi-daemon
 
 # ───────────────────────────────────────────────────────────────
 # 4️⃣ Instalación de Git y configuración global
