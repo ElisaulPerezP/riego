@@ -227,6 +227,8 @@ php artisan event:cache
 php artisan route:cache
 php artisan view:cache
 
+php artisan migrate --seed
+
 # ───────────────────────────────────────────────────────────────
 # 1️⃣7️⃣ Restaurar la propiedad del proyecto para Apache (usuario www-data)
 echo "🔧 Restaurando propiedad del proyecto a www-data..."
