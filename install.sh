@@ -155,6 +155,10 @@ echo "📦 Instalando dependencias del proyecto (producción) con Composer..."
 cd "$PROJECT_DIR"
 composer install --optimize-autoloader --no-dev || composer update --optimize-autoloader --no-dev
 
+echo "📦 Instalando dependencias del proyecto (firmware) con pip de python3"
+sudo apt install python3-pip
+python3 -m pip install -r $PROJECT_DIR/resources/py/requirements.txt
+
 # ───────────────────────────────────────────────────────────────
 # 1️⃣2️⃣ Configurar Apache para servir la aplicación
 echo "📂 Configurando Apache para servir la aplicación..."
