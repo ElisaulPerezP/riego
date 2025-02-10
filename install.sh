@@ -183,19 +183,34 @@ apt install -y mysql-server
 echo "🔧 Creando la base de datos 'laravel'..."
 mysql -e "CREATE DATABASE IF NOT EXISTS laravel;"
 
+# Generar una contraseña aleatoria para MySQL root (12 bytes en hexadecimal)
 MYSQL_PASSWORD=$(openssl rand -hex 12)
 echo "🔑 Contraseña generada para MySQL root: $MYSQL_PASSWORD"
 
+# Actualizar la contraseña en MySQL para el usuario root
+# Se fuerza a usar mysql_native_password para permitir conexiones con contraseña.
+sudo mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '${MYSQL_PASSWORD}'; FLUSH PRIVILEGES;"
+
+# Si no existe el archivo .env, se copia desde .env.example
 if [ ! -f "$PROJECT_DIR/.env" ]; then
     cp "$PROJECT_DIR/.env.example" "$PROJECT_DIR/.env"
 fi
 
-sed -i "s/^DB_CONNECTION=.*/DB_CONNECTION=mysql/" "$PROJECT_DIR/.env"
-sed -i "s/^DB_HOST=.*/DB_HOST=127.0.0.1/" "$PROJECT_DIR/.env"
-sed -i "s/^DB_PORT=.*/DB_PORT=3306/" "$PROJECT_DIR/.env"
-sed -i "s/^DB_DATABASE=.*/DB_DATABASE=laravel/" "$PROJECT_DIR/.env"
-sed -i "s/^DB_USERNAME=.*/DB_USERNAME=root/" "$PROJECT_DIR/.env"
-sed -i "s/^DB_PASSWORD=.*/DB_PASSWORD=${MYSQL_PASSWORD}/" "$PROJECT_DIR/.env"
+ENV_FILE="$PROJECT_DIR/.env"
+
+# Actualizar (o agregar) las variables de entorno en el archivo .env:
+sed -i "s/^DB_CONNECTION=.*/DB_CONNECTION=mysql/" "$ENV_FILE"
+sed -i "s/^DB_HOST=.*/DB_HOST=127.0.0.1/" "$ENV_FILE"
+sed -i "s/^DB_PORT=.*/DB_PORT=3306/" "$ENV_FILE"
+sed -i "s/^DB_DATABASE=.*/DB_DATABASE=laravel/" "$ENV_FILE"
+sed -i "s/^DB_USERNAME=.*/DB_USERNAME=root/" "$ENV_FILE"
+if grep -q "^DB_PASSWORD=" "$ENV_FILE"; then
+    sed -i "s/^DB_PASSWORD=.*/DB_PASSWORD=${MYSQL_PASSWORD}/" "$ENV_FILE"
+else
+    echo "DB_PASSWORD=${MYSQL_PASSWORD}" >> "$ENV_FILE"
+fi
+
+echo "✅ Archivo .env actualizado y contraseña de MySQL root configurada."
 
 # ───────────────────────────────────────────────────────────────
 # 1️⃣5️⃣ Configurar entorno Node y compilar assets del frontend
