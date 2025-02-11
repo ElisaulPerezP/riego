@@ -263,7 +263,11 @@ sudo make install
 sudo pigpiod
 
 # ───────────────────────────────────────────────────────────────
-# 1️⃣8️⃣ Restaurar la propiedad del proyecto para Apache (usuario www-data)
+# 1️⃣8️⃣ Establecimiento de servicios de gpio e inicio del firmware
+
+
+# ───────────────────────────────────────────────────────────────
+# 1️⃣ Restaurar la propiedad del proyecto para Apache (usuario www-data)
 echo "🔧 Restaurando propiedad del proyecto a www-data..."
 sudo chown -R www-data:www-data "$PROJECT_DIR"
 sudo chmod 755 /home/arandanos
