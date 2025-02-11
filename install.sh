@@ -32,7 +32,7 @@ echo "🚀 Iniciando instalación del proyecto Riego en producción..."
 echo "============================================"
 
 # ───────────────────────────────────────────────────────────────
-# 3️⃣ Actualización de paquetes
+# 3️⃣ Actualización de paquetes y daemons
 echo "🔄 Actualizando lista de paquetes..."
 apt update -y
 sudo apt install avahi-daemon -y
@@ -252,14 +252,25 @@ php artisan view:cache
 php artisan migrate --seed
 
 # ───────────────────────────────────────────────────────────────
-# 1️⃣7️⃣ Restaurar la propiedad del proyecto para Apache (usuario www-data)
+# 1️⃣7️⃣ Configurar el sistema para operar perifericos
+echo "📂 Configurando la aplicación para manejar los pines de proposito general..."
+sudo apt install git build-essential
+cd /tmp
+git clone https://github.com/joan2937/pigpio.git
+cd pigpio
+make
+sudo make install
+sudo pigpiod
+
+# ───────────────────────────────────────────────────────────────
+# 1️⃣8️⃣ Restaurar la propiedad del proyecto para Apache (usuario www-data)
 echo "🔧 Restaurando propiedad del proyecto a www-data..."
 sudo chown -R www-data:www-data "$PROJECT_DIR"
 sudo chmod 755 /home/arandanos
 echo "✅ Propiedad restaurada a www-data."
 
 # ───────────────────────────────────────────────────────────────
-# 1️⃣8️⃣ Mensaje final
+# 1️⃣ Mensaje final
 echo "============================================"
 echo "🎉 Instalación completada con éxito."
 echo "Accede a http://arandanos.local en tu navegador (asegúrate de tener la entrada en tu archivo hosts si es necesario)."
