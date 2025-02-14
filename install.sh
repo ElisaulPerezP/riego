@@ -272,7 +272,27 @@ chmod 755 /home/arandanos
 echo "✅ Propiedad restaurada a www-data."
 
 # ───────────────────────────────────────────────────────────────
+# 1️⃣9️⃣ Instalar y configurar el servicio main_controller
+echo "📂 Configurando el servicio main_controller..."
+SERVICE_SRC="$PROJECT_DIR/config/services/main_controller.service"
+SERVICE_DEST="/etc/systemd/system/main_controller.service"
+
+if [ -f "$SERVICE_SRC" ]; then
+    cp "$SERVICE_SRC" "$SERVICE_DEST"
+    echo "✅ Archivo main_controller.service copiado a $SERVICE_DEST."
+else
+    echo "❌ ERROR: No se encontró el archivo $SERVICE_SRC."
+    exit 1
+fi
+
+# Recargar systemd, habilitar y arrancar el servicio
+systemctl daemon-reload
+systemctl enable main_controller.service
+systemctl start main_controller.service
+echo "✅ Servicio main_controller habilitado y arrancado."
+
+# ───────────────────────────────────────────────────────────────
 # 1️⃣ Mensaje final
 echo "============================================"
 echo "🎉 Instalación completada con éxito."
-echo "Accede a http://arandanos.local en tu navegador (asegúrate de tener la entrada en tu archivo hosts si es necesario)."
+echo "Accede a http://arandanos.local en tu navegador."
