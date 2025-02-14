@@ -262,6 +262,9 @@ git clone https://github.com/joan2937/pigpio.git
 cd pigpio
 make
 make install
+
+# Asegurarse de que el binario pigpiod tenga permisos de ejecución
+sudo chmod +x /usr/local/bin/pigpiod
 sudo pigpiod
 
 # ───────────────────────────────────────────────────────────────

@@ -4,7 +4,7 @@ After=network.target
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/pigpiod
+ExecStart=/usr/local/bin/pigpiod
 Restart=always
 RestartSec=5
 
