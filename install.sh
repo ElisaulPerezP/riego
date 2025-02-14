@@ -262,7 +262,7 @@ git clone https://github.com/joan2937/pigpio.git
 cd pigpio
 make
 make install
-pigpiod
+sudo pigpiod
 
 # ───────────────────────────────────────────────────────────────
 # 1️⃣8️⃣ Restaurar la propiedad del proyecto para Apache (usuario www-data)

@@ -10,7 +10,6 @@ WorkingDirectory=/home/arandanos/riego/resources/py/src
 # Comando para iniciar el script (verifica que /usr/bin/python3 sea la ruta correcta a Python 3)
 ExecStart=/usr/bin/python3 /home/arandanos/riego/resources/py/src/main_controller.py
 # Reiniciar automáticamente en caso de fallo
-Restart=always
 RestartSec=5
 
 [Install]
