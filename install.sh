@@ -1,7 +1,7 @@
 #!/bin/bash
 # install.sh - Instalador del proyecto Riego para Producción
 # Este script configura el entorno, clona el repositorio (si es necesario),
-# instala PHP 8.2, Composer, Apache, MySQL y Node.js, configura Git, genera la clave SSH,
+# instala PHP 8.2, Composer, Apache, MariaDB y Node.js, configura Git, genera la clave SSH,
 # configura la base de datos, compila los assets del frontend y prepara la aplicación para producción.
 #
 # Procedimiento de despliegue en producción:
@@ -35,9 +35,9 @@ echo "============================================"
 # 3️⃣ Actualización de paquetes y daemons
 echo "🔄 Actualizando lista de paquetes..."
 apt update -y
-sudo apt install avahi-daemon -y
-sudo systemctl enable avahi-daemon
-sudo systemctl start avahi-daemon
+apt install -y avahi-daemon
+systemctl enable avahi-daemon
+systemctl start avahi-daemon
 
 # ───────────────────────────────────────────────────────────────
 # 4️⃣ Instalación de Git y configuración global
@@ -103,7 +103,7 @@ fi
 # ───────────────────────────────────────────────────────────────
 # 7️⃣ Configurar permisos temporales para la instalación (propiedad: arandanos)
 echo "🔧 Configurando permisos temporales para la instalación..."
-sudo chown -R arandanos:arandanos "$PROJECT_DIR"
+chown -R arandanos:arandanos "$PROJECT_DIR"
 chmod -R 755 "$PROJECT_DIR"
 if [ -d "$PROJECT_DIR/storage" ] && [ -d "$PROJECT_DIR/bootstrap/cache" ]; then
     chmod -R 775 "$PROJECT_DIR/storage" "$PROJECT_DIR/bootstrap/cache"
@@ -111,9 +111,11 @@ fi
 echo "✅ Permisos temporales configurados (propiedad: arandanos)."
 
 # ───────────────────────────────────────────────────────────────
-# 8️⃣ Instalar PHP 8.2 y extensiones necesarias
+# 8️⃣ Instalar PHP 8.2 y extensiones necesarias usando el repositorio de sury.org
 echo "📥 Instalando PHP 8.2 y extensiones necesarias..."
-add-apt-repository -y ppa:ondrej/php
+apt install -y apt-transport-https lsb-release ca-certificates curl software-properties-common
+curl -fsSL https://packages.sury.org/php/apt.gpg | gpg --dearmor -o /usr/share/keyrings/php-archive-keyring.gpg
+echo "deb [signed-by=/usr/share/keyrings/php-archive-keyring.gpg] https://packages.sury.org/php/ $(lsb_release -sc) main" | tee /etc/apt/sources.list.d/php.list
 apt update -y
 apt install -y php8.2 php8.2-cli php8.2-common php8.2-mbstring php8.2-xml php8.2-bcmath php8.2-curl php8.2-zip php8.2-gd php8.2-intl php8.2-mysql php8.2-dom
 echo "🔍 Verificando versión de PHP..."
@@ -156,8 +158,8 @@ cd "$PROJECT_DIR"
 composer install --optimize-autoloader --no-dev || composer update --optimize-autoloader --no-dev
 
 echo "📦 Instalando dependencias del proyecto (firmware) con pip de python3"
-sudo apt install python3-pip
-python3 -m pip install -r $PROJECT_DIR/resources/py/requirements.txt
+apt install -y python3-pip
+python3 -m pip install -r "$PROJECT_DIR/resources/py/requirements.txt"
 
 # ───────────────────────────────────────────────────────────────
 # 1️⃣2️⃣ Configurar Apache para servir la aplicación
@@ -183,20 +185,19 @@ echo "🔧 Configurando Git para considerar el directorio seguro..."
 sudo -u arandanos git config --global --add safe.directory "$PROJECT_DIR"
 
 # ───────────────────────────────────────────────────────────────
-# 1️⃣4️⃣ Configurar la base de datos (MySQL) y actualizar .env
-echo "📥 Instalando y configurando MySQL..."
-apt install -y mysql-server
+# 1️⃣4️⃣ Configurar la base de datos (MariaDB) y actualizar .env
+echo "📥 Instalando y configurando MariaDB..."
+apt install -y mariadb-server
 
 echo "🔧 Creando la base de datos 'laravel'..."
 mysql -e "CREATE DATABASE IF NOT EXISTS laravel;"
 
-# Generar una contraseña aleatoria para MySQL root (12 bytes en hexadecimal)
+# Generar una contraseña aleatoria para MariaDB root (12 bytes en hexadecimal)
 MYSQL_PASSWORD=$(openssl rand -hex 12)
-echo "🔑 Contraseña generada para MySQL root: $MYSQL_PASSWORD"
+echo "🔑 Contraseña generada para MariaDB root: $MYSQL_PASSWORD"
 
-# Actualizar la contraseña en MySQL para el usuario root
-# Se fuerza a usar mysql_native_password para permitir conexiones con contraseña.
-sudo mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '${MYSQL_PASSWORD}'; FLUSH PRIVILEGES;"
+# Actualizar la contraseña en MariaDB para el usuario root usando SET PASSWORD
+sudo mysql -e "SET PASSWORD FOR 'root'@'localhost' = PASSWORD('${MYSQL_PASSWORD}');"
 
 # Si no existe el archivo .env, se copia desde .env.example
 if [ ! -f "$PROJECT_DIR/.env" ]; then
@@ -217,7 +218,9 @@ else
     echo "DB_PASSWORD=${MYSQL_PASSWORD}" >> "$ENV_FILE"
 fi
 
-echo "✅ Archivo .env actualizado y contraseña de MySQL root configurada."
+echo "✅ Archivo .env actualizado y contraseña de MariaDB root configurada."
+
+
 
 # ───────────────────────────────────────────────────────────────
 # 1️⃣5️⃣ Configurar entorno Node y compilar assets del frontend
@@ -232,7 +235,7 @@ node -v
 npm -v
 
 # Aseguramos la propiedad para que npm pueda escribir
-sudo chown -R arandanos:arandanos "$PROJECT_DIR"
+chown -R arandanos:arandanos "$PROJECT_DIR"
 cd "$PROJECT_DIR"
 npm install
 npm audit fix
@@ -248,29 +251,24 @@ php artisan config:cache
 php artisan event:cache
 php artisan route:cache
 php artisan view:cache
-
 php artisan migrate --seed
 
 # ───────────────────────────────────────────────────────────────
-# 1️⃣7️⃣ Configurar el sistema para operar perifericos
-echo "📂 Configurando la aplicación para manejar los pines de proposito general..."
-sudo apt install git build-essential
+# 1️⃣7️⃣ Configurar el sistema para operar periféricos
+echo "📂 Configurando la aplicación para manejar los pines de propósito general..."
+apt install -y git build-essential
 cd /tmp
 git clone https://github.com/joan2937/pigpio.git
 cd pigpio
 make
-sudo make install
-sudo pigpiod
+make install
+pigpiod
 
 # ───────────────────────────────────────────────────────────────
-# 1️⃣8️⃣ Establecimiento de servicios de gpio e inicio del firmware
-
-
-# ───────────────────────────────────────────────────────────────
-# 1️⃣ Restaurar la propiedad del proyecto para Apache (usuario www-data)
+# 1️⃣8️⃣ Restaurar la propiedad del proyecto para Apache (usuario www-data)
 echo "🔧 Restaurando propiedad del proyecto a www-data..."
-sudo chown -R www-data:www-data "$PROJECT_DIR"
-sudo chmod 755 /home/arandanos
+chown -R www-data:www-data "$PROJECT_DIR"
+chmod 755 /home/arandanos
 echo "✅ Propiedad restaurada a www-data."
 
 # ───────────────────────────────────────────────────────────────
@@ -278,4 +276,3 @@ echo "✅ Propiedad restaurada a www-data."
 echo "============================================"
 echo "🎉 Instalación completada con éxito."
 echo "Accede a http://arandanos.local en tu navegador (asegúrate de tener la entrada en tu archivo hosts si es necesario)."
-
