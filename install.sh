@@ -292,7 +292,27 @@ systemctl start main_controller.service
 echo "✅ Servicio main_controller habilitado y arrancado."
 
 # ───────────────────────────────────────────────────────────────
-# 1️⃣ Mensaje final
+# 2️⃣0️⃣ Instalar y configurar el servicio pigpiod
+echo "📂 Configurando el servicio pigpiod..."
+PIGPIOD_SERVICE_SRC="$PROJECT_DIR/config/services/pigpiod.service"
+PIGPIOD_SERVICE_DEST="/etc/systemd/system/pigpiod.service"
+
+if [ -f "$PIGPIOD_SERVICE_SRC" ]; then
+    cp "$PIGPIOD_SERVICE_SRC" "$PIGPIOD_SERVICE_DEST"
+    echo "✅ Archivo pigpiod.service copiado a $PIGPIOD_SERVICE_DEST."
+else
+    echo "❌ ERROR: No se encontró el archivo $PIGPIOD_SERVICE_SRC."
+    exit 1
+fi
+
+# Recargar systemd, habilitar y arrancar el servicio pigpiod
+systemctl daemon-reload
+systemctl enable pigpiod.service
+systemctl start pigpiod.service
+echo "✅ Servicio pigpiod habilitado y arrancado."
+
+# ───────────────────────────────────────────────────────────────
+# 2️⃣1️⃣ Mensaje final
 echo "============================================"
 echo "🎉 Instalación completada con éxito."
 echo "Accede a http://arandanos.local en tu navegador."
