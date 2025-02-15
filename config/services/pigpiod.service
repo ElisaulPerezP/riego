@@ -3,9 +3,13 @@ Description=Pigpio Daemon
 After=network.target
 
 [Service]
+# Ejecutar en primer plano para que systemd lo controle
 Type=simple
-ExecStart=/usr/local/bin/pigpiod
-Restart=always
+# La opci -g evita la bifurcacion y mantiene el proceso en foreground
+# La opci -l indica que solo se escuchen conexiones locales (ajusta segn tu necesidad)
+ExecStart=/usr/local/bin/pigpiod -g -l
+# Reinicia solo si ocurre un fallo
+Restart=on-failure
 RestartSec=5
 
 [Install]

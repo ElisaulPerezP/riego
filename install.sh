@@ -308,10 +308,12 @@ else
     exit 1
 fi
 
-# Recargar systemd, habilitar y arrancar el servicio pigpiod
-systemctl daemon-reload
-systemctl enable pigpiod.service
-systemctl start pigpiod.service
+# Recargar systemd para reconocer el nuevo servicio,
+# habilitar el servicio para que arranque al iniciar el sistema,
+# y arrancarlo de inmediato.
+sudo systemctl daemon-reload
+sudo systemctl enable pigpiod.service
+sudo systemctl restart pigpiod.service
 echo "✅ Servicio pigpiod habilitado y arrancado."
 
 # ───────────────────────────────────────────────────────────────
